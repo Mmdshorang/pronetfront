@@ -1,10 +1,8 @@
 import { useState } from "react";
 import RtlProvider from "../common/RtlProvider";
 import Logo from "../../assets/logoAdina.svg";
-import useLayout from "../../hooks/useLayout";
-
 const Login = () => {
-  const { isDesktop } = useLayout();
+ 
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {

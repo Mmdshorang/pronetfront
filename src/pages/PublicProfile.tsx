@@ -1,6 +1,8 @@
 import React from 'react';
-import { Card, CardContent, Typography, Grid, Rating, Chip, Box } from '@mui/material';
 import { useParams } from 'react-router-dom';
+import { Card, CardContent, CardHeader } from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
+import { Avatar, AvatarImage, AvatarFallback } from "../components/ui/avatar";
 
 interface PublicProfileProps {
   name: string;
@@ -63,74 +65,60 @@ const PublicProfile: React.FC = () => {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Card>
-        <CardContent>
-          <Grid container spacing={3}>
-            <Grid item xs={12}>
-              <Typography variant="h4" gutterBottom>
-                {profile.name}
-              </Typography>
-              <Typography variant="h6" color="textSecondary" gutterBottom>
-                {profile.position} در {profile.company}
-              </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Rating value={profile.rating} precision={0.5} readOnly />
-                <Typography variant="body2" sx={{ mr: 1 }}>
-                  ({profile.rating})
-                </Typography>
-              </Box>
-            </Grid>
+    <div className="p-6">
+      <Card className="max-w-4xl mx-auto">
+        <CardHeader className="flex flex-row items-center gap-4">
+          <Avatar className="h-20 w-20">
+            <AvatarImage src="/avatar.png" alt={profile.name} />
+            <AvatarFallback>{profile.name.charAt(0)}</AvatarFallback>
+          </Avatar>
+          <div>
+            <h1 className="text-2xl font-bold">{profile.name}</h1>
+            <p className="text-muted-foreground">{profile.position} در {profile.company}</p>
+            <div className="flex items-center gap-2 mt-2">
+              <Badge variant="secondary">امتیاز: {profile.rating}</Badge>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div>
+            <h2 className="text-lg font-semibold mb-2">مهارت‌ها</h2>
+            <div className="flex flex-wrap gap-2">
+              {profile.skills.map((skill, index) => (
+                <Badge key={index} variant="outline">
+                  {skill}
+                </Badge>
+              ))}
+            </div>
+          </div>
 
-            <Grid item xs={12}>
-              <Typography variant="h6" gutterBottom>
-                مهارت‌ها
-              </Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                {profile.skills.map((skill, index) => (
-                  <Chip key={index} label={skill} />
-                ))}
-              </Box>
-            </Grid>
-
-            <Grid item xs={12}>
-              <Typography variant="h6" gutterBottom>
-                سوابق کاری
-              </Typography>
+          <div>
+            <h2 className="text-lg font-semibold mb-2">سوابق کاری</h2>
+            <div className="space-y-4">
               {profile.experience.map((exp, index) => (
-                <Box key={index} sx={{ mb: 2 }}>
-                  <Typography variant="subtitle1">
-                    {exp.title} - {exp.company}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    {exp.duration}
-                  </Typography>
-                  <Typography variant="body2">
-                    {exp.description}
-                  </Typography>
-                </Box>
+                <div key={index} className="border-b pb-4 last:border-0">
+                  <h3 className="font-medium">{exp.title} - {exp.company}</h3>
+                  <p className="text-sm text-muted-foreground">{exp.duration}</p>
+                  <p className="text-sm mt-1">{exp.description}</p>
+                </div>
               ))}
-            </Grid>
+            </div>
+          </div>
 
-            <Grid item xs={12}>
-              <Typography variant="h6" gutterBottom>
-                تحصیلات
-              </Typography>
+          <div>
+            <h2 className="text-lg font-semibold mb-2">تحصیلات</h2>
+            <div className="space-y-4">
               {profile.education.map((edu, index) => (
-                <Box key={index} sx={{ mb: 2 }}>
-                  <Typography variant="subtitle1">
-                    {edu.degree} در {edu.field}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    {edu.university} - {edu.year}
-                  </Typography>
-                </Box>
+                <div key={index} className="border-b pb-4 last:border-0">
+                  <h3 className="font-medium">{edu.degree} در {edu.field}</h3>
+                  <p className="text-sm text-muted-foreground">{edu.university} - {edu.year}</p>
+                </div>
               ))}
-            </Grid>
-          </Grid>
+            </div>
+          </div>
         </CardContent>
       </Card>
-    </Box>
+    </div>
   );
 };
 

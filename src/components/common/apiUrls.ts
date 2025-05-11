@@ -4,18 +4,6 @@
 // };
 // http://192.168.1.163:45455/
 
-type EndpointCategory =
-  | "auth"
-  | "report"
-  | "ProductManagement"
-  | "WareHouseHandling"
-  | "goodcardex"
-  | "BasicDefinitions"
-  | "Reports"
-  | "companies"
-  | "employees"
-  | "profiles"
-  | "evaluations";
 
 type ApiEndpoint = string | ((id: string) => string);
 
