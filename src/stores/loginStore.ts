@@ -1,12 +1,12 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import type { UserLoginType } from "../types/loginType";
-
+import type { User } from "../types";
 
 interface UserInfoStore {
   isLoggedIn: boolean;
-  user: UserLoginType |null;
-  addUser: (user: UserLoginType, token?: string) => void;
+  user: User | null;
+  token: string | null;
+  addUser: (user: User, token: string) => void;
   clearUser: () => void;
 }
 
@@ -15,11 +15,13 @@ export const useUserInfoStore = create<UserInfoStore>()(
     (set) => ({
       isLoggedIn: false,
       user: null,
+      token: null,
 
-      addUser: (user) =>
+      addUser: (user, token) =>
         set(() => ({
           isLoggedIn: true,
           user,
+          token,
         })),
       clearUser: () => {
         localStorage.clear();
@@ -27,6 +29,7 @@ export const useUserInfoStore = create<UserInfoStore>()(
 
         set(() => ({
           user: null,
+          token: null,
           isLoggedIn: false,
         }));
       },

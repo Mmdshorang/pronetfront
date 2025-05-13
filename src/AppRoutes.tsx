@@ -4,8 +4,8 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import Layout from './components/Layout';
 
-import Login from './pages/Login';
-import Register from './pages/Register';
+import Login from './pages/auth/Login';
+import Register from './pages/auth/Register';
 import Dashboard from "./pages/Dashboard";
 import Employees from "./pages/Employees";
 import Companies from "./pages/Companies";

@@ -2,16 +2,16 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import Layout from './components/Layout';
-import Login from './pages/Login';
-import Register from './pages/Register';
+import Login from './pages/auth/Login';
+import Register from './pages/auth/Register';
 import Dashboard from './pages/Dashboard';
 import Companies from './pages/Companies';
 import Employees from './pages/Employees';
 import NotFound from './pages/NotFound';
 import Home from './pages/Home';
 import { SnackbarProvider } from './components/common/SnackbarContext';
-import AxiosProvider from './components/providers/AxiosProvider';
 import { AuthProvider } from './contexts/AuthContext';
+import ReactQueryProvider from './components/providers/ReactQueryProvider';
 
 const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
@@ -20,9 +20,9 @@ const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
 const AppRoutes: React.FC = () => {
   return (
-    <AuthProvider>
-      <SnackbarProvider>
-        <AxiosProvider>
+    <ReactQueryProvider>
+      <AuthProvider>
+        <SnackbarProvider>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
@@ -42,9 +42,9 @@ const AppRoutes: React.FC = () => {
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </AxiosProvider>
-      </SnackbarProvider>
-    </AuthProvider>
+        </SnackbarProvider>
+      </AuthProvider>
+    </ReactQueryProvider>
   );
 };
 
