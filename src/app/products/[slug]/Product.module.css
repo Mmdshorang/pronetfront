@@ -1,0 +1,98 @@
+.main{
+  background: linear-gradient(to bottom, #f5f7fa, #c3cfe2);
+}
+.counterBox{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15;
+}
+.deleteButton {
+    background-color: #c6c6c6; 
+    color: rgb(0, 0, 0);
+    padding: 12px;
+    padding-top: 6px;
+    border-radius: 50%;
+    border: none; 
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    width: 40px;
+    height: 40px;
+  
+  }
+  
+  .deleteButton:hover {
+    background-color: #d10e0e; 
+    color: #ffffff;
+  }
+  
+  .deleteButton:active {
+    transform: scale(0.95); 
+  }
+  
+  .deleteButton:focus {
+    outline: none;
+  }
+  .count{
+    color: rgb(0, 0, 0);
+    font-size: x-large;
+    text-align: center;
+    
+  }
+  .addButton {
+    background-color: #c6c6c6; 
+    color: rgb(0, 0, 0);
+    padding: 8px;
+    padding-top: 7px;
+    border-radius: 50%;
+    border: none; 
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    width: 40px;
+    height: 40px;
+  }
+  
+  .addButton:hover {
+    background-color: #037f1a;
+    color: #ffffff;
+     
+  }
+  
+  .addButton:active {
+    transform: scale(0.95); 
+  }
+  
+  .addButton:focus {
+    outline: none;
+  }
+  .addToCart {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    width: 100%;
+    background-color: #646464; 
+    color: white;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: none;
+    margin-top: 20px;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out, transform 0.1s;
+  }
+  
+  .addToCart:hover {
+    background-color: #037f1a; 
+  }
+  
+  .addToCart:active {
+    transform: scale(0.95); 
+  }
+  
+  .addToCart:focus {
+    outline: none;
+    box-shadow: 0 0 5px rgba(59, 130, 246, 0.5); 
+  }
+  .unit{
+    font-size: x-large;
+  }
+  
