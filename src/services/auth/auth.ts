@@ -1,52 +1,43 @@
 import { getApiUrl } from "@/common/apiUrls";
 import { showSnackbar } from "@/stores/snackbarStore";
 import { StatusCodes } from "@/types/model/generic";
-import { Resault } from "@/types/server/resaultClass";
-import { Registermodel } from "@/types/server/auth";
+import { AuthResponse, LoginData, RegisterData } from "@/types/server/auth";
 import axios from "axios";
 import qs from "qs";
-import { UserModel } from "@/types/server/user";
-export const RegisterRequest = async (
-  data: Registermodel
-): Promise<Resault> => {
+
+export const loginRequest = async (
+  data: LoginData
+): Promise<AuthResponse> => {
   const formData = qs.stringify({
-    ID: data.ID,
-    Name: data.Name,
-    Family: data.Family,
-    Mobilenumber: data.Mobilenumber,
-    Tel: data.Tel,
-    Address: data.Address,
-    PostalCode: data.PostalCode,
-    Code: data.Code,
-    Tokens: data.Tokens,
+    email: data.email,
+    password: data.password
   });
-  const response = await axios.post(getApiUrl("v1", "Logins"), formData);
+  console.log(formData)
+  const response = await axios.post(getApiUrl("v1", "login"), formData);
   console.log(response);
   const result = response.data;
-  if (result?.StatusCode === StatusCodes.Success) {
-    showSnackbar(result?.StatusMessage, "success");
+  if (result?.status === StatusCodes.Success) {
+    showSnackbar(result?.message, "success");
   } else {
-    showSnackbar(result?.StatusMessage, "error");
+    showSnackbar(result?.message, "error");
   }
   console.log(result)
   return response.data;
 };
-export const FirstRegisterRequest = async (
-  data: Registermodel
-): Promise<UserModel> => {
+export const RegisterRequest = async (
+  data: RegisterData
+): Promise<AuthResponse> => {
   const formData = qs.stringify({
-    ID: data.ID,
-    Name: data.Name,
-    Family: data.Family,
-    Mobilenumber: data.Mobilenumber,
-    Tel: data.Tel,
-    Address: data.Address,
-    PostalCode: data.PostalCode,
-    Code: data.Code,
-    Tokens: data.Tokens,
+    name: data.name,
+    email: data.email,
+    password: data.password,
+    password_confirmation: data.password_confirmation,
+    role: data.role,
+    location: data.location
+
   });
 console.log(formData)
-  const response = await axios.post(getApiUrl("v1", "FirstRegister"), formData);
+  const response = await axios.post(getApiUrl("v1", "register"), formData);
 console.log(response)
   const result = response.data.Resault;
   if (result?.StatusCode === StatusCodes.Success) {

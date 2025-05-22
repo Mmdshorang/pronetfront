@@ -1,25 +1,41 @@
 "use client";
-
 import { useMutation } from "@tanstack/react-query";
-
-import { RegisterRequest } from "@/services/auth/auth";
-import { Registermodel } from "@/types/server/auth";
-
+import { loginRequest, RegisterRequest } from "@/services/auth/auth";
 import { AxiosError } from "axios";
-import { Resault } from "@/types/server/resaultClass";
-import { showSnackbar } from "@/stores/snackbarStore";
-
-
-const useRegisterRequest = () => {
-  const mutation = useMutation<Resault, AxiosError, Registermodel>({
+import useSnackbarStore from "@/stores/snackbarStore";
+import { AuthResponse, LoginData, RegisterData } from "@/types/server/auth";
+import { useUserInfoStore } from "@/stores/userStore";
+import {useRouter} from "next/navigation";
+export const useRegisterRequest = () => {
+  const { show } = useSnackbarStore();
+  const mutation = useMutation<AuthResponse, AxiosError, RegisterData>({
     mutationFn: (data) => RegisterRequest(data),
 
     onError: (error) => {
-      showSnackbar(error.message, "error");
+      show(error.message, "error");
     },
   });
 
   return mutation;
 };
 
-export default useRegisterRequest;
+export const useLoginRequest = () => {
+  const { show } = useSnackbarStore();
+  const { addUser } = useUserInfoStore();
+  const router = useRouter();
+  const mutation = useMutation<AuthResponse, AxiosError, LoginData>({
+    mutationFn: (data) => loginRequest(data),
+    onSuccess: (data) => {
+      if (data.status === "success") {
+    addUser(data.data.user, data.data.token);
+        router.push("/");
+      }
+
+    },
+    onError: (error) => {
+      show(error.message, "error");
+    },
+  });
+
+  return mutation;
+};

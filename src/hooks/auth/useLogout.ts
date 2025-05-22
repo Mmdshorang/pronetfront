@@ -1,12 +1,13 @@
 
 "use client";
-import { useUserStore } from "@/stores/userStore";
+
+import { useUserInfoStore } from "@/stores/userStore";
 import { useRouter } from "next/navigation";
 
 
 export const useLogout = () => {
   const router = useRouter();
-  const clearUser = useUserStore((state) => state.clearUser);
+  const clearUser = useUserInfoStore((state) => state.clearUser);
 
   const logout = () => {
     clearUser();

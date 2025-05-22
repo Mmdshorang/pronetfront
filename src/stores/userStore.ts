@@ -1,36 +1,43 @@
-import { create } from 'zustand';
-import { userService } from '../services/user';
-import type { User } from '../types/user';
+import { User } from "@/types/server/user";
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
-interface UserState {
-    user: User | null;
-    loading: boolean;
-    error: string | null;
-    fetchUser: (id: number) => Promise<void>;
-    setUser: (user: User | null) => void;
-    clearUser: () => void;
+
+interface UserInfoStore {
+  isLoggedIn: boolean;
+  user: User | null;
+  token: string | null;
+  addUser: (user: User, token: string) => void;
+  clearUser: () => void;
 }
 
-export const useUserStore = create<UserState>((set) => ({
-    user: null,
-    loading: false,
-    error: null,
+export const useUserInfoStore = create<UserInfoStore>()(
+  persist(
+    (set) => ({
+      isLoggedIn: false,
+      user: null,
+      token: null,
 
-    fetchUser: async (id: number) => {
-        try {
-            set({ loading: true, error: null });
-            const response = await userService.getUser(id);
-            if (response.status === 'success' && response.data) {
-                set({ user: response.data, loading: false });
-            } else {
-                set({ error: response.message || 'Failed to fetch user', loading: false });
-            }
-        } catch (error) {
-            set({ error: 'Failed to fetch user', loading: false });
-        }
-    },
+      addUser: (user, token) =>
+        set(() => ({
+          isLoggedIn: true,
+          user,
+          token,
+        })),
+      clearUser: () => {
+        localStorage.clear();
+        sessionStorage.clear();
 
-    setUser: (user: User | null) => set({ user }),
-
-    clearUser: () => set({ user: null, error: null }),
-})); 
+        set(() => ({
+          user: null,
+          token: null,
+          isLoggedIn: false,
+        }));
+      },
+    }),
+    {
+      name: "User-storage",
+      partialize: (state) => ({ user: state.user, isLoggedIn: state.isLoggedIn }),
+    }
+  )
+);

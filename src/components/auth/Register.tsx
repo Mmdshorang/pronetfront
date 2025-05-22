@@ -1,12 +1,16 @@
+import { useRegisterRequest } from '@/hooks/auth/register';
 import React, { useState } from 'react';
-import { useAuth } from '../../hooks';
-import { Link, useNavigate } from 'react-router-dom';
-import type { RegisterData } from '../../types';
+import {useRouter} from "next/navigation"
 import { FaUser, FaEnvelope, FaLock, FaMapMarkerAlt } from 'react-icons/fa';
+import { RegisterData } from '@/types/server/auth';
 
-const Register: React.FC = () => {
-    const { register, loading, error } = useAuth();
-    const navigate = useNavigate();
+
+interface FormData {
+    onBack: () => void;
+}
+const Register: React.FC<FormData> = ({ onBack }) => {
+    const { mutate, isPending, error } = useRegisterRequest();
+    const navigate = useRouter();
     const [formData, setFormData] = useState<RegisterData>({
         name: '',
         email: '',
@@ -26,8 +30,8 @@ const Register: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            await register(formData);
-            navigate('/');
+            await mutate(formData);
+            navigate.push('/');
         } catch (err) {
             // Error is handled by React Query
             console.error('Registration failed:', err);
@@ -35,16 +39,16 @@ const Register: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-100 to-purple-100 p-6">
+        <>
             <div className="bg-white shadow-xl rounded-2xl p-8 max-w-md w-full">
                 <h2 className="text-center text-3xl font-bold text-gray-800 mb-2">
                     ثبت‌نام در سامانه
                 </h2>
                 <p className="text-center text-sm text-gray-500 mb-6">
                     قبلا ثبت‌نام کرده‌اید؟{' '}
-                    <Link to="/login" className="text-blue-600 font-medium hover:underline">
+                    <button onClick={onBack} className="text-blue-600 font-medium hover:underline">
                         وارد شوید
-                    </Link>
+                    </button>
                 </p>
 
                 <form className="space-y-4" onSubmit={handleSubmit}>
@@ -125,14 +129,14 @@ const Register: React.FC = () => {
 
                     <button
                         type="submit"
-                        disabled={loading}
+                        disabled={isPending}
                         className="w-full py-2 px-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {loading ? 'در حال ثبت‌نام...' : 'ثبت‌نام'}
+                        {isPending ? 'در حال ثبت‌نام...' : 'ثبت‌نام'}
                     </button>
                 </form>
             </div>
-        </div>
+        </>
     );
 };
 

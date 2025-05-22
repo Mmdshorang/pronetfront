@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import { useAuth } from '../../hooks';
-import { Link, useNavigate } from 'react-router-dom';
-import type { LoginData } from '../../types/index';
+
 import { FaEnvelope, FaLock } from 'react-icons/fa';
+import { LoginData } from '@/types/server/auth';
+import { useLoginRequest } from '@/hooks/auth/register';
 
-
-const Login: React.FC = () => {
-    const { login, loading, error } = useAuth();
-    const navigate = useNavigate();
+interface LoginProps {
+  onRegister: () => void;
+}
+const Login: React.FC<LoginProps> = ({onRegister}: LoginProps) => {
+    const { mutate, isPending, error, } = useLoginRequest();
+   
  
     const [formData, setFormData] = useState<LoginData>({
         email: '',
@@ -24,22 +26,22 @@ const Login: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        await login(formData); 
-        navigate('/');
+        await mutate(formData); 
+     
+        
 
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
+        <>
         <div className="w-full max-w-md p-8 bg-white rounded-2xl shadow-xl">
           <div className="mb-6 text-center">
             <h2 className="text-4xl font-bold text-gray-800">ورود</h2>
             <p className="text-gray-600 mt-2">
               حساب ندارید؟{' '}
-              <Link to="/register" className="text-indigo-600 font-semibold hover:underline">
+              <button onClick={onRegister} className="text-indigo-600 font-semibold hover:underline">
                 ثبت‌نام کنید
-              </Link>
+              </button>
             </p>
           </div>
   
@@ -79,21 +81,21 @@ const Login: React.FC = () => {
             </div>
   
             {error && (
-              <div className="text-red-500 text-center text-sm font-medium">{error}</div>
+              <div className="text-red-500 text-center text-sm font-medium">{error.message}</div>
             )}
   
             <div>
               <button
                 type="submit"
-                disabled={loading}
+                disabled={isPending}
                 className="w-full py-2 px-4 text-white bg-indigo-600 hover:bg-indigo-700 transition rounded-xl font-semibold disabled:opacity-60"
               >
-                {loading ? 'در حال ورود...' : 'ورود'}
+                {isPending ? 'در حال ورود...' : 'ورود'}
               </button>
             </div>
           </form>
         </div>
-      </div>
+      </>
     );
 };
 

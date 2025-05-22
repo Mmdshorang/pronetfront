@@ -5,15 +5,48 @@ import Link from "next/link";
 import UserMenu from "../profile&login/UserMenu";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import DrawerNavigation from "../drawer/DrawerNavigation";
-import { useUserStore } from "@/stores/userStore";
 import Popover from "./PopoverCartBox";
+import { useUserInfoStore } from "@/stores/userStore";
+import DrawerNavigation from "../drawer/DrawerNavigation";
+const items = [
+  {
+    key: "cart",
+    label: "سبد خرید",
+    icon: <ShoppingCart className="w-5 h-5" />,
+    href: "/cart",
+  },
+  {
+    key: "menu",
+    label: "دسته بندی",
+    icon: <Menu className="w-5 h-5" />,
+    href: "/menu",
+  },
+  {
+    key: "home",
+    label: "خانه",
+    icon: <Home className="w-5 h-5" />,
+    href: "/",
+  },
+  {
+    key: "products",
+    label: "محصولات",
+    icon: <Box className="w-5 h-5" />,
+    href: "/products",
+  },
+  {
+    key: "profile",
+    label: "پروفایل",
+    icon: <User className="w-5 h-5" />,
+    href: "/profile",
+  },
+];
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const { isLoggedIn } = useUserStore();
+  const isLoggedIn = useUserInfoStore((state) => state.isLoggedIn);
 
+   console.log(isLoggedIn)
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 1020);
@@ -26,39 +59,7 @@ const Navbar: React.FC = () => {
 
   const pathname = usePathname();
 
-  const items = [
-    {
-      key: "cart",
-      label: "سبد خرید",
-      icon: <ShoppingCart className="w-5 h-5" />,
-      href: "/cart",
-    },
-    {
-      key: "menu",
-      label: "دسته بندی",
-      icon: <Menu className="w-5 h-5" />,
-      href: "/menu",
-    },
-    {
-      key: "home",
-      label: "خانه",
-      icon: <Home className="w-5 h-5" />,
-      href: "/",
-    },
-    {
-      key: "products",
-      label: "محصولات",
-      icon: <Box className="w-5 h-5" />,
-      href: "/products",
-    },
-    {
-      key: "profile",
-      label: "پروفایل",
-      icon: <User className="w-5 h-5" />,
-      href: "/profile",
-    },
-  ];
-
+ 
   return (
     <>
       {!isMobile && (
@@ -148,7 +149,7 @@ const Navbar: React.FC = () => {
           <nav className="bg-gray-300 shadow-md p-5 sticky top-0 z-50 bg-opacity-70 backdrop-blur-md">
             <div className="container flex justify-between">
               <button className="lg:hidden" onClick={() => setIsOpen(!isOpen)}>
-                <DrawerNavigation />
+                <DrawerNavigation/>
               </button>
               {isLoggedIn ? (
                 <UserMenu />

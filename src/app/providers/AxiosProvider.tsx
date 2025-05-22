@@ -50,7 +50,7 @@ const AxiosProvider = ({ children }: Props) => {
   useEffect(() => {
     if (!baseURL) return;
 
-    axios.defaults.baseURL = `${baseURL}/`;
+    axios.defaults.baseURL = `${baseURL}/api/`;
 
     // if (token && token.trim()) {
     //   axios.defaults.headers.common["Token"] = token;

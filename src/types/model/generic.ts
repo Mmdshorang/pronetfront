@@ -1,6 +1,6 @@
 export enum StatusCodes {
-	Error = "Error",
-	Success =200,
+	Error = "error",
+	Success = "success",
 	timeCodeFail = -30,
 }
 

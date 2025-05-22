@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { ShoppingBag, Settings, ChevronDown } from 'lucide-react';
 import Link from 'next/link';
-import { useUserStore } from '@/stores/userStore';
+
 import LogoutButton from '../shared/LogoutButton';
+import { useUserInfoStore } from '@/stores/userStore';
 const UserMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { user } = useUserStore();
+  const  user  = useUserInfoStore((state)=>state.user);
 
   return (
     <div className="relative ml-8">
@@ -13,7 +14,7 @@ const UserMenu = () => {
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center bg-yellow-500 text-white py-2 px-4 rounded-full shadow-lg"
       >
-        {user?.Name ?? ""}
+        {user?.email ?? ""}
         <ChevronDown className="w-4 h-4 " />
       </button>
 

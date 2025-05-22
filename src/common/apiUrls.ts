@@ -12,9 +12,10 @@ const apiEndpoints: { [version: string]: ApiEndpoints } = {
   v1: {
    
     GetCategoryShop: "/GetCategoryShop",
-    Logins: "/Logins",
+    login: "/login",
     FirstRegister: "/FirstRegister",
     GetBestSellGood: "/GetBestSellGood",
+    
   },
 };
 
