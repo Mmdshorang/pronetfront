@@ -5,7 +5,7 @@ import { AxiosError } from "axios";
 import useSnackbarStore from "@/stores/snackbarStore";
 import { AuthResponse, LoginData, RegisterData } from "@/types/server/auth";
 import { useUserInfoStore } from "@/stores/userStore";
-import {useRouter} from "next/navigation";
+import { useRouter } from "next/navigation";
 export const useRegisterRequest = () => {
   const { show } = useSnackbarStore();
   const mutation = useMutation<AuthResponse, AxiosError, RegisterData>({
@@ -27,10 +27,35 @@ export const useLoginRequest = () => {
     mutationFn: (data) => loginRequest(data),
     onSuccess: (data) => {
       if (data.status === "success") {
-    addUser(data.data.user, data.data.token);
+        addUser(data.data.user, data.data.token);
         router.push("/");
       }
+    },
+    onError: (error) => {
+      show(error.message, "error");
+    },
+  });
 
+  return mutation;
+};
+
+export const useLoginAdminRequest = () => {
+  const { show } = useSnackbarStore();
+  const { addUser } = useUserInfoStore();
+  const router = useRouter();
+  const mutation = useMutation<AuthResponse, AxiosError, LoginData>({
+    mutationFn: (data) => loginRequest(data),
+    onSuccess: (data) => {
+      if (data.status === "success") {
+        if (data.data.user.role === "admin") {
+          addUser(data.data.user, data.data.token);
+          router.push("/admin/home");
+        } else {
+          show("شما ادمین نیستید", "error");
+
+        }
+
+      }
     },
     onError: (error) => {
       show(error.message, "error");

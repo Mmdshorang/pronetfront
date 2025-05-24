@@ -2,15 +2,11 @@ import React, { useState } from 'react';
 
 import { FaEnvelope, FaLock } from 'react-icons/fa';
 import { LoginData } from '@/types/server/auth';
-import { useLoginRequest } from '@/hooks/auth/register';
+import { useLoginAdminRequest } from '@/hooks/auth/register';
 
-interface LoginProps {
-  onRegister: () => void;
-}
-const Login: React.FC<LoginProps> = ({onRegister}: LoginProps) => {
-    const { mutate, isPending, error, } = useLoginRequest();
-   
- 
+
+const Login: React.FC = () => {
+    const { mutate, isPending, error, } = useLoginAdminRequest();
     const [formData, setFormData] = useState<LoginData>({
         email: '',
         password: '',
@@ -27,9 +23,6 @@ const Login: React.FC<LoginProps> = ({onRegister}: LoginProps) => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         await mutate(formData); 
-        
-        
-
     };
 
     return (
@@ -37,12 +30,6 @@ const Login: React.FC<LoginProps> = ({onRegister}: LoginProps) => {
         <div className="w-full max-w-md p-8 bg-white rounded-2xl shadow-xl">
           <div className="mb-6 text-center">
             <h2 className="text-4xl font-bold text-gray-800">ورود</h2>
-            <p className="text-gray-600 mt-2">
-              حساب ندارید؟{' '}
-              <button onClick={onRegister} className="text-indigo-600 font-semibold hover:underline">
-                ثبت‌نام کنید
-              </button>
-            </p>
           </div>
   
           <form onSubmit={handleSubmit} className="space-y-5">

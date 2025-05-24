@@ -1,6 +1,7 @@
 export interface Location {
     id: number;
-    name: string;
+    city: string;
+    country: string;
     created_at: string;
     updated_at: string;
 }
@@ -9,7 +10,6 @@ export interface Skill {
     id: number;
     user_id: number;
     name: string;
-    category: string;
     created_at: string;
     updated_at: string;
 }
@@ -33,37 +33,35 @@ export interface Company {
     location_id: number | null;
     created_at: string;
     updated_at: string;
-    pivot: {
-        job_title: string;
+    pivot: CompanyPivotJob;
+}
+export interface CompanyPivotJob {
+    job_title: string;
         start_date: string;
         end_date: string | null;
         description: string | null;
         employment_type: string;
-    };
 }
 
 export interface UserRating {
     id: number;
     user_id: number;
     reviewer_id: number;
-    rating: number;
-    comment: string | null;
+    overall_rating: number;
+    comment: string;
     created_at: string;
     updated_at: string;
-    reviewer: {
-        id: number;
-        name: string;
-        email: string;
-        role: string;
-    };
-}
-
+  }
 export interface User {
     id: number;
     name: string;
     email: string;
     role: string;
-    location_id: number | null;
+    bio:string;
+    phone: string;
+    linkedin_url: string;
+    github_url: string | null;
+    profile_photo: string | null;
     email_verified_at: string | null;
     created_at: string;
     updated_at: string;
@@ -80,3 +78,46 @@ export interface UserResponse {
     data?: User;
     error?: string;
 } 
+
+
+
+
+//update user
+export interface UpdateUserRequest {
+    name?: string;
+    email?: string;
+    password?: string;
+    profile_photo?: string;
+    bio?: string;
+    phone?: string;
+    linkedin_url?: string;
+    city?: string;
+    country?: string;
+    github_url?: string;
+}
+
+
+  
+
+//response update user
+export interface UpdatedUserResponse {
+    status: string;
+    message: string;
+    data: {
+        id: number;
+        name: string;
+        email: string;
+        email_verified_at: string;
+        role: string;
+        location_id: number;
+        bio: string | null;
+        phone: string;
+        linkedin_url: string;
+        github_url: string | null;
+        created_at: string;
+        updated_at: string;
+        skills: Skill[];
+        achievements: Achievement[];
+        location: Location;
+    };
+}

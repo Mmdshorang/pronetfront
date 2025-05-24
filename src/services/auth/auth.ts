@@ -14,14 +14,15 @@ export const loginRequest = async (
   });
   console.log(formData)
   const response = await axios.post(getApiUrl("v1", "login"), formData);
-  console.log(response);
+  console.log(response+ "+ 1");
   const result = response.data;
+  
   if (result?.status === StatusCodes.Success) {
     showSnackbar(result?.message, "success");
   } else {
     showSnackbar(result?.message, "error");
   }
-  console.log(result)
+
   return response.data;
 };
 export const RegisterRequest = async (
@@ -43,8 +44,14 @@ console.log(response)
   if (result?.StatusCode === StatusCodes.Success) {
     showSnackbar(result?.StatusMessage, "success");
   } else {
-    console.log(result?.StatusMessage)
-    showSnackbar(result?.StatusMessage, "error");
+      if (result.errors) {
+        const errorMessages = Object.values(result.errors)
+          .flat() // برای جمع کردن همه آرایه‌ها در یک آرایه
+          .join(" | ");
+        showSnackbar(errorMessages, "error");
+      } else {
+        showSnackbar(result.message, "error");
+      }
   }
   return response.data;
 };

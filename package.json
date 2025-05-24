@@ -13,6 +13,7 @@
     "@fontsource/vazir": "^4.5.4",
     "@headlessui/react": "^2.2.1",
     "@heroicons/react": "^2.2.0",
+    "@radix-ui/react-label": "^2.1.7",
     "@tailwindcss/line-clamp": "^0.4.4",
     "@tanstack/react-query": "^5.74.4",
     "axios": "^1.8.4",
@@ -26,6 +27,7 @@
     "react-dom": "^19.0.0",
     "react-icons": "^5.5.0",
     "react-intersection-observer": "^9.16.0",
+    "react-modern-calendar-datepicker": "^3.1.6",
     "tailwind-merge": "^3.3.0",
     "zustand": "^5.0.3"
   },
