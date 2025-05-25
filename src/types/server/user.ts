@@ -1,9 +1,9 @@
 export interface Location {
-    id: number;
+    id?: number;
     city: string;
     country: string;
-    created_at: string;
-    updated_at: string;
+    created_at?: string;
+    updated_at?: string;
 }
 
 export interface Skill {
@@ -52,6 +52,22 @@ export interface UserRating {
     created_at: string;
     updated_at: string;
   }
+
+  export interface UserBase {
+    id: number;
+    name: string;
+    email: string;
+    role: string;
+    bio:string;
+    phone: string;
+    linkedin_url: string;
+    github_url: string | null;
+    profile_photo: string | null;
+    email_verified_at?: string | null;
+    location: Location | null;
+    created_at?: string;
+    updated_at?: string;
+}
 export interface User {
     id: number;
     name: string;
@@ -62,14 +78,14 @@ export interface User {
     linkedin_url: string;
     github_url: string | null;
     profile_photo: string | null;
-    email_verified_at: string | null;
-    created_at: string;
-    updated_at: string;
+    email_verified_at?: string | null;
+    location: Location | null;
+    created_at?: string;
+    updated_at?: string;
     skills: Skill[];
     achievements: Achievement[];
     receivedRatings: UserRating[];
     companies: Company[];
-    location: Location | null;
 }
 
 export interface UserResponse {

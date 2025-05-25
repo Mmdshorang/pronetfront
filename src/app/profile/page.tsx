@@ -12,10 +12,13 @@ import AddCompanyForm from "@/components/dialogs/AddJobCompny";
 import axios from "axios";
 import EditUserProfileForm from "@/components/dialogs/Edit‌‌‌‌BaseProfileDialog";
 import AddSkillForm from "@/components/dialogs/AddSkillForm";
+import AddAchievementForm from "@/components/dialogs/AddAchievementForm";
+import UserRatingProfile from "@/components/dialogs/UserRating";
 
 const ProfilePage = () => {
   const fileInputRef = useRef<HTMLInputElement>(null); // ✅ همیشه در رأس کامپوننت
   const user = useUserInfoStore((state) => state.user);
+  console.log(user)
   const [onpendAddCompanyDialog, setOpenedAddCompanyDialog] = useState(false);
   const [preview, setPreview] = useState<string>(
     user?.profile_photo ?? "/default-avatar.png"
@@ -66,6 +69,8 @@ const ProfilePage = () => {
     setIsEditing(false)
   }
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDialogOpenAchievement, setIsDialogOpenAchievement] = useState(false);
+
 
   const handleAddSkillClick = () => {
     setIsDialogOpen(true); // باز کردن دیالوگ برای افزودن مهارت
@@ -81,6 +86,12 @@ const ProfilePage = () => {
     handleCloseDialog(); // بستن دیالوگ بعد از افزودن مهارت
   };
 
+
+  const handleAddAchievement = (title: string) => {
+    console.log("دستاورد جدید:", title);
+    // اینجا می‌تونی API فراخوانی کنی و بعد لیست رو به‌روزرسانی کنی
+    setIsDialogOpen(false);
+  };
   if (!user) return <p className="text-center mt-20 text-gray-500">لطفاً وارد شوید</p>;
 
   return (
@@ -103,7 +114,7 @@ const ProfilePage = () => {
             onChange={handleFileChange}
           />
 
-<div className="flex-1 space-y-2">
+          <div className="flex-1 space-y-2">
             <h1 className="text-2xl font-bold flex items-center gap-2">
               <User2 className="w-6 h-6" />
               {user.name}
@@ -115,10 +126,10 @@ const ProfilePage = () => {
             <div className="space-y-2">
               <h1 className="text-lg text-gray-600 flex items-center gap-2">
                 <Github className="w-6 h-6" />
-                <a href={user.github_url??''} target="_blank" rel="noopener noreferrer">{user.github_url}</a>
+                <a href={user.github_url ?? ''} target="_blank" rel="noopener noreferrer">{user.github_url}</a>
               </h1>
               <h1 className="text-lg text-gray-600 flex items-center gap-2">
-                <Linkedin  className="w-6 h-6" />
+                <Linkedin className="w-6 h-6" />
                 <a href={user.linkedin_url} target="_blank" rel="noopener noreferrer">{user.linkedin_url}</a>
               </h1>
             </div>
@@ -141,9 +152,9 @@ const ProfilePage = () => {
 
 
           <Button variant="outline" className="gap-1" onClick={handleEditClick}>
-          <Pencil className="w-4 h-4" />
-          ویرایش
-        </Button>
+            <Pencil className="w-4 h-4" />
+            ویرایش
+          </Button>
         </CardContent>
       </Card>
 
@@ -155,18 +166,18 @@ const ProfilePage = () => {
               <Briefcase className="w-5 h-5" />
               سوابق شغلی
             </h2>
-            {!onpendAddCompanyDialog && <Button size="sm" variant="outline" onClick={() => setOpenedAddCompanyDialog(true)}>
+            <Button size="sm" variant="outline" onClick={() => setOpenedAddCompanyDialog(true)}>
               <Plus className="w-4 h-4" /> افزودن مهارت
-            </Button>}
-            {onpendAddCompanyDialog &&
-             <Dialog open={onpendAddCompanyDialog} onClose={() => setOpenedAddCompanyDialog(false)}>
+            </Button>
+
+            <Dialog open={onpendAddCompanyDialog} onClose={() => setOpenedAddCompanyDialog(false)}>
               <DialogTrigger>
                 <Button className="mt-2">+ افزودن سابقه شغلی</Button>
               </DialogTrigger>
               <DialogContent>
-                <AddCompanyForm  onSubmit={(data:Company)=>{}} onCancel={() => setOpenedAddCompanyDialog(false)} />
+                <AddCompanyForm onSubmit={(data: Company) => { }} onCancel={() => setOpenedAddCompanyDialog(false)} />
               </DialogContent>
-            </Dialog>}
+            </Dialog>
           </div>
 
           {user?.companies?.length ? (
@@ -202,7 +213,7 @@ const ProfilePage = () => {
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold">مهارت‌ها</h2>
-            <Button size="sm" variant="outline" onClick={handleAddSkillClick}>
+            <Button size="sm" variant="outline" onClick={handleAddSkillClick} >
               <Plus className="w-4 h-4" /> افزودن مهارت
             </Button>
           </div>
@@ -220,7 +231,7 @@ const ProfilePage = () => {
         </CardContent>
       </Card>
       <Dialog open={isDialogOpen} onClose={handleCloseDialog}>
-        <AddSkillForm onSubmit={handleAddSkill}  />
+        <AddSkillForm onSubmit={handleAddSkill}onCancel={() => setIsDialogOpen(false)} />
       </Dialog>
       {/* دستاوردها */}
       <Card>
@@ -230,7 +241,7 @@ const ProfilePage = () => {
               <Award className="w-5 h-5" />
               دستاوردها
             </h2>
-            <Button size="sm" variant="outline">
+            <Button size="sm" variant="outline" onClick={() => setIsDialogOpenAchievement(true)}>
               <Plus className="w-4 h-4" /> افزودن دستاورد
             </Button>
           </div>
@@ -246,34 +257,18 @@ const ProfilePage = () => {
           )}
         </CardContent>
       </Card>
-
+      <Dialog open={isDialogOpenAchievement} onClose={() => setIsDialogOpenAchievement(false)}>
+        <AddAchievementForm onSubmit={handleAddAchievement} onCancel={() => setIsDialogOpenAchievement(false)} />
+      </Dialog>
       {/* امتیاز دریافتی */}
-      <Card>
-        <CardContent className="p-6">
-          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            <Star className="w-5 h-5" /> امتیازها
-          </h2>
-          {user?.receivedRatings?.length ? (
-            <div className="grid gap-2">
-              {user.receivedRatings.map((r: UserRating) => (
-                <div key={r?.id} className="flex justify-between items-center border-b pb-2">
-                  <span>{r?.overall_rating ?? ''}</span>
-                  <span className="text-yellow-500 font-semibold">{r?.comment}5</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-gray-500 text-sm">امتیازی دریافت نشده.</p>
-          )}
-        </CardContent>
-      </Card>
+      <UserRatingProfile />
 
       {isEditing && (
         <Dialog open={isEditing} onClose={handleCancel}>
           <DialogContent>
             <EditUserProfileForm
               user={user}
-              onSubmit={handleSubmit}
+              
               onCancel={handleCancel}
             />
           </DialogContent>

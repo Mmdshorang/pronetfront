@@ -27,3 +27,29 @@ export interface CompanyAddResponse {
     data: CompanyAdd;
   }
   
+
+//get company home page
+// types.ts
+export interface getCompany {
+  id: number;
+  name: string;
+  industry: string;
+  city: string;
+  logo: string;
+  ratings_count:number;
+  avg_rating: number;
+}
+
+
+export interface getCompaniesData {
+  companies: getCompany[];
+  total: number;
+  current_page: number;
+  per_page: number;
+}
+
+export interface getCompaniesResponse {
+  status: "success" | "error";
+  message: string;
+  data: getCompaniesData;
+}

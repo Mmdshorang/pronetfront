@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-
-const AddSkillForm = ({ onSubmit }: { onSubmit: (skill: string) => void }) => {
+import { useUserInfoStore } from "@/stores/userStore";
+import { v4 as uuidv4 } from 'uuid';
+const AddSkillForm = ({ onSubmit, onCancel }: { onSubmit: (skill: string) => void; onCancel: () => void }) => {
   const [skillName, setSkillName] = useState("");
+  const addSkill = useUserInfoStore((state) => state.addSkill);
+  const user = useUserInfoStore((state) => state.user);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,10 +24,10 @@ const AddSkillForm = ({ onSubmit }: { onSubmit: (skill: string) => void }) => {
         onChange={(e) => setSkillName(e.target.value)}
       />
       <div className="flex justify-end gap-2">
-        <Button type="button" variant="outline" onClick={() => setSkillName("")}>
+        <Button type="button" variant="outline" onClick={onCancel}>
           لغو
         </Button>
-        <Button type="submit">افزودن مهارت</Button>
+        <Button type="submit" onClick={() => addSkill({ id: Number(uuidv4()), user_id: user?.id??0, name:skillName, created_at: "", updated_at: "" })}>افزودن مهارت</Button>
       </div>
     </form>
   );

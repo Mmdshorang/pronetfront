@@ -25,10 +25,11 @@ export const data: Product = {
 import Amazing from "@/assets/Amazing.svg";
 import Amazings from "@/assets/Amazings.svg";
 import Image from "next/image";
+
 const Discount: React.FC = () => {
   const sliderRef = useRef<HTMLDivElement>(null);
   const [isMobile, setIsMobile] = useState(false);
-
+ 
   const scrollLeft = () => {
     if (sliderRef.current) {
       sliderRef.current.scrollBy({ left: -200, behavior: "smooth" });

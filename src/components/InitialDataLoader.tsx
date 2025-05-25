@@ -5,6 +5,7 @@
 const InitialDataLoader = () => {
   // useGetCategoryShopRequest();
   // useProduct();
+  
   return null;
 };
 

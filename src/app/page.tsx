@@ -1,3 +1,4 @@
+'use client';
 import Navbar from "@/components/shared/Navbar";
 import Slideshow from "@/components/slideShow/SlideShow";
 import Footer from "@/components/shared/Footer";
@@ -6,8 +7,15 @@ import classes from "./Home.module.css";
 import Items from "@/components/cart/Items";
 import Discount from "@/components/discount/Discounts";
 import Features from "@/components/Feature";
+import CompaniesGrid from "@/components/company/CompaniesGrid";
+
+
+
 
 export default function Home() {
+  
+
+ 
   return (
     <div className={classes.main}>
       <Navbar />
@@ -17,9 +25,7 @@ export default function Home() {
       <div className="mt-10 mb-10 h-[500px]">
         <Discount />
       </div>
-      <div className="">
-        <Items text="پرفروش‌ترین‌ها" link="suggestions" tag="MostSale" />
-      </div>
+      <CompaniesGrid />
       <div className="mt-10">
         <CategoryGrid />
       </div>

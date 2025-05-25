@@ -22,3 +22,6 @@ export const CompanyAddRequest = async (
     console.log(result)
     return response.data;
   };
+
+
+  
