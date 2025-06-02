@@ -3,56 +3,72 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useUserInfoStore } from "@/stores/userStore";
-import { Achievement, Company, Skill, UserRating } from "@/types/server/user";
-import { MapPin, Star, Briefcase, Award, User2, Pencil, Plus } from "lucide-react";
+import { Achievement, Company, Skill, UserUpdate } from "@/types/server/user";
+import { MapPin, Briefcase, Award, User2, Pencil, Plus } from "lucide-react";
 import { Github, Linkedin } from "lucide-react"
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { useRef, useState } from "react";
 import AddCompanyForm from "@/components/dialogs/AddJobCompny";
-import axios from "axios";
 import EditUserProfileForm from "@/components/dialogs/Edit‌‌‌‌BaseProfileDialog";
 import AddSkillForm from "@/components/dialogs/AddSkillForm";
 import AddAchievementForm from "@/components/dialogs/AddAchievementForm";
 import UserRatingProfile from "@/components/dialogs/UserRating";
+import { useUpdateProfileRequest } from "@/hooks/user/updateProfile";
+import { showSnackbar } from "@/stores/snackbarStore";
 
 const ProfilePage = () => {
   const fileInputRef = useRef<HTMLInputElement>(null); // ✅ همیشه در رأس کامپوننت
   const user = useUserInfoStore((state) => state.user);
-  console.log(user)
+
+  const [preview, setPreview] = useState<string | null>(null);
+const [data,setData]=useState<UserUpdate >({
+  bio: user?.bio,
+  name: user?.name,
+  email: user?.email,
+  phone: user?.phone,
+  linkedin_url: user?.linkedin_url,
+  github_url: user?.github_url ?? "",
+  city: user?.location?.city,
+  country: user?.location?.country,
+});
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+     
+      setPreview(URL.createObjectURL(file));
+      handleUpload(file);
+    }
+  };
+
+  const { mutate } = useUpdateProfileRequest()
   const [onpendAddCompanyDialog, setOpenedAddCompanyDialog] = useState(false);
-  const [preview, setPreview] = useState<string>(
-    user?.profile_photo ?? "/default-avatar.png"
-  );
+
 
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
   };
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // نمایش پیش‌نمایش فوری
-    const url = URL.createObjectURL(file);
-    setPreview(url);
-
-    // ارسال به سرور
-    const formData = new FormData();
-    formData.append("profile_photo", file);
-
-    try {
-      const res = await axios.post("/api/update", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      // اگر نیاز به ذخیره در استور داشتی می‌تونی انجام بدی
-      // مثلاً: updateUser({ ...user, avatarUrl: res.data.url });
-
-      setPreview(res.data.url); // نمایش آدرس جدید
-    } catch (error) {
-      console.error("خطا در آپلود تصویر:", error);
+  const handleUpload = async (file:File | null) => {
+    if (!file) {
+      showSnackbar('ابتدا لطفا عکس رو وارد کنید', 'error')
     }
+
+    const info: UserUpdate = {
+      profile_photo: file,
+      bio: user?.bio,
+      name: user?.name,
+      email: user?.email,
+      phone: user?.phone,
+      linkedin_url: user?.linkedin_url,
+      github_url: user?.github_url ?? "",
+      city: user?.location?.city,
+      country: user?.location?.country,
+
+    }
+    mutate(info);
+   
+  
   };
+ 
   const [isEditing, setIsEditing] = useState(false)
 
   const handleEditClick = () => {
@@ -64,13 +80,22 @@ const ProfilePage = () => {
   }
 
   const handleSubmit = (updatedUser) => {
-    // اینجا می‌توانید اطلاعات جدید را به API یا دیتابیس ارسال کنید
-    console.log("کاربر ویرایش شد:", updatedUser)
-    setIsEditing(false)
+    const info: UserUpdate = {
+      profile_photo: file,
+      bio: user?.bio,
+      name: user?.name,
+      email: user?.email,
+      phone: user?.phone,
+      linkedin_url: user?.linkedin_url,
+      github_url: user?.github_url ?? "",
+      city: user?.location?.city,
+      country: user?.location?.country,
+
+    }
+    mutate(info);
   }
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDialogOpenAchievement, setIsDialogOpenAchievement] = useState(false);
-
 
   const handleAddSkillClick = () => {
     setIsDialogOpen(true); // باز کردن دیالوگ برای افزودن مهارت
@@ -92,28 +117,29 @@ const ProfilePage = () => {
     // اینجا می‌تونی API فراخوانی کنی و بعد لیست رو به‌روزرسانی کنی
     setIsDialogOpen(false);
   };
+  console.log(user)
   if (!user) return <p className="text-center mt-20 text-gray-500">لطفاً وارد شوید</p>;
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8">
       {/* اطلاعات کلی کاربر */}
+
       <Card>
         <CardContent className="p-6 flex items-center gap-6">
           <div onClick={handleAvatarClick}>
             <Avatar className="w-20 h-20 ring-2 ring-gray-200 shadow-md hover:opacity-80 cursor-pointer">
-              <AvatarImage src={preview} alt={user.name ?? ""} />
+              <AvatarImage src={preview ?? user?.profile_photo ?? ""} alt={user.name ?? ""} />
               <AvatarFallback>{user?.name?.[0] ?? ""}</AvatarFallback>
             </Avatar>
           </div>
 
           <input
-            ref={fileInputRef}
             type="file"
             accept="image/*"
-            className="hidden"
             onChange={handleFileChange}
+            ref={fileInputRef}
+            className="hidden"
           />
-
           <div className="flex-1 space-y-2">
             <h1 className="text-2xl font-bold flex items-center gap-2">
               <User2 className="w-6 h-6" />
@@ -231,7 +257,7 @@ const ProfilePage = () => {
         </CardContent>
       </Card>
       <Dialog open={isDialogOpen} onClose={handleCloseDialog}>
-        <AddSkillForm onSubmit={handleAddSkill}onCancel={() => setIsDialogOpen(false)} />
+        <AddSkillForm onSubmit={handleAddSkill} onCancel={() => setIsDialogOpen(false)} />
       </Dialog>
       {/* دستاوردها */}
       <Card>
@@ -268,7 +294,7 @@ const ProfilePage = () => {
           <DialogContent>
             <EditUserProfileForm
               user={user}
-              
+
               onCancel={handleCancel}
             />
           </DialogContent>

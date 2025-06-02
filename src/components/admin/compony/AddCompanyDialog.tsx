@@ -17,18 +17,19 @@ const AddCompanyDialog = ({ open, onClose, onSuccess }: Props) => {
     password: '',
     city: '',
     country: '',
-    logo: '',
+    logo: null,
     description: '',
     industry: '',
     website: '',
     phone: '',
   });
 
-
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [errors, setErrors] = useState<{ [key: string]: boolean }>({});
 
+
   const requiredFields = ['name', 'email', 'password'];
-  const { mutate, isPending,data } = useCompanyAddRequest();
+  const { mutate, isPending, data } = useCompanyAddRequest();
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: name === 'location_id' ? Number(value) : value }));
@@ -51,11 +52,21 @@ const AddCompanyDialog = ({ open, onClose, onSuccess }: Props) => {
     }
 
     await mutate(formData);
-    if(data?.status === "success") {
+    if (data?.status === "success") {
       onSuccess();
     }
 
   };
+
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      setFormData(prev => ({ ...prev, logo: file }));
+    }
+  };
+
 
   if (!open) return null;
 
@@ -68,7 +79,6 @@ const AddCompanyDialog = ({ open, onClose, onSuccess }: Props) => {
             ['name', 'نام شرکت'],
             ['email', 'ایمیل'],
             ['password', 'رمز عبور'],
-            ['logo', 'لوگو (URL)'],
             ['description', 'توضیحات'],
             ['industry', 'صنعت'],
             ['website', 'وب‌سایت'],
@@ -81,7 +91,7 @@ const AddCompanyDialog = ({ open, onClose, onSuccess }: Props) => {
               <input
                 type={name === 'password' ? 'password' : 'text'}
                 name={name}
-                value={formData[name as keyof CompanyAdd] ?? ''}
+                value={formData[name as 'name' | 'email' | 'password' | 'description' | 'industry' | 'website' | 'phone' | 'city' | 'country' ] ?? ''}
                 onChange={handleChange}
                 style={{
                   ...styles.input,
@@ -90,13 +100,39 @@ const AddCompanyDialog = ({ open, onClose, onSuccess }: Props) => {
               />
             </div>
           ))}
+
+          <div style={styles.inputGroup}>
+            <label style={styles.label}>لوگو (تصویر)</label>
+            <input
+              type="file"
+              accept="image/*"
+              name="logo"
+              onChange={handleFileChange}
+              style={{
+                ...styles.input,
+                padding: '8px',
+                borderColor: errors['logo'] ? 'red' : '#ccc',
+              }}
+            />
+            {selectedFile && (
+              <p style={{ fontSize: 12, color: '#555' }}>
+                فایل انتخاب‌شده: {selectedFile.name}
+              </p>
+            )}
+          </div>
         </div>
+
         <div style={styles.actions}>
-          <button onClick={onClose} disabled={isPending} style={styles.cancelBtn}>لغو</button>
-          <button onClick={handleSubmit} disabled={isPending} style={styles.submitBtn}>افزودن</button>
+          <button onClick={onClose} disabled={isPending} style={styles.cancelBtn}>
+            لغو
+          </button>
+          <button onClick={handleSubmit} disabled={isPending} style={styles.submitBtn}>
+            افزودن
+          </button>
         </div>
       </div>
     </div>
+
   );
 };
 

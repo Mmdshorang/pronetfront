@@ -33,24 +33,26 @@ export const RegisterRequest = async (
     email: data.email,
     password: data.password,
     password_confirmation: data.password_confirmation,
-    role: data.role,
-    location: data.location
+    city: data.city??null,
+    country: data.country??null
 
   });
 console.log(formData)
   const response = await axios.post(getApiUrl("v1", "register"), formData);
 console.log(response)
-  const result = response.data.Resault;
-  if (result?.StatusCode === StatusCodes.Success) {
-    showSnackbar(result?.StatusMessage, "success");
+  const result = response.data;
+  console.log(result)
+  if (result?.status === StatusCodes.Success) {
+    showSnackbar(result?.message, "success");
   } else {
       if (result.errors) {
-        const errorMessages = Object.values(result.errors)
-          .flat() // برای جمع کردن همه آرایه‌ها در یک آرایه
-          .join(" | ");
-        showSnackbar(errorMessages, "error");
+        if(result.errors?.email){
+          showSnackbar(result.errors?.email, "error");
+        }else if(result.errors?.password){
+          showSnackbar(result.errors?.password, "error");
+        }
       } else {
-        showSnackbar(result.message, "error");
+    showSnackbar("خطایی رخ داده", "error");
       }
   }
   return response.data;

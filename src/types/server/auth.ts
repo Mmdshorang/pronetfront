@@ -4,8 +4,8 @@ export interface RegisterData {
   name: string;
   email: string;
   password: string;
-  role?: string;
-  location: string | null;
+  city?: string | null;
+  country?: string | null;
   password_confirmation: string;
 }
 

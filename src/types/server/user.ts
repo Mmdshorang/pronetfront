@@ -84,7 +84,7 @@ export interface User {
     updated_at?: string;
     skills: Skill[];
     achievements: Achievement[];
-    receivedRatings: UserRating[];
+    received_ratings: UserRating[];
     companies: Company[];
 }
 
@@ -116,24 +116,42 @@ export interface UpdateUserRequest {
   
 
 //response update user
+
+export interface UserUpdate {
+    name?: string; // 'sometimes|required|string|max:255' -> Optional string
+    email?: string; // 'sometimes|required|email|unique:users,email'
+    profile_photo?: File | null;
+    // 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048'
+    password?: string; // 'nullable|string|min:6'
+    bio?: string; // 'nullable|string'
+    phone?: string; // 'nullable|string|max:20'
+    linkedin_url?: string; // 'nullable|url|max:255'
+    city?: string; // 'sometimes|required|string|max:255' -> Optional string
+    country?: string; // 'sometimes|required|string|max:255' -> Optional string
+    github_url?: string; // 'nullable|url|max:255'
+  }
+  
 export interface UpdatedUserResponse {
     status: string;
     message: string;
-    data: {
-        id: number;
-        name: string;
-        email: string;
-        email_verified_at: string;
-        role: string;
-        location_id: number;
-        bio: string | null;
-        phone: string;
-        linkedin_url: string;
-        github_url: string | null;
-        created_at: string;
-        updated_at: string;
-        skills: Skill[];
-        achievements: Achievement[];
-        location: Location;
-    };
+    data: User;
 }
+
+
+//search
+export interface SearchResult {
+    id: number;
+    name: string;
+    email: string;
+    photo: string | null;
+    type: 'user' | 'company';
+  }
+  
+export  interface SearchResponse {
+    status: string;
+    message: string;
+    data: SearchResult[];
+    hasMore: boolean;
+    currentPage: number;
+  }
+  

@@ -11,12 +11,13 @@ type ApiEndpoints = {
 const apiEndpoints: { [version: string]: ApiEndpoints } = {
   v1: {
    
-    GetCategoryShop: "/GetCategoryShop",
+
     login: "/login",
     register: "/register",
     GetBestSellGood: "/GetBestSellGood",
-    companies: "/companies",
-    
+    getcompanies: "/get-companies",
+    user: "/user/update",
+    companyCreate:'/companies',
   },
 };
 

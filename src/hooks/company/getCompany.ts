@@ -1,8 +1,8 @@
 "use client";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useSnackbarStore from "@/stores/snackbarStore";
-import { getCompaniesResponse } from "@/types/server/company";
+import { getCompaniesResponse, getCompanyByIdResponse } from "@/types/server/company";
 import { GetCompanyByIDRequest, GetCompanyRequest } from "@/services/company/getCompany";
 import useCompanyStore from "@/stores/companyStore";
 
@@ -36,11 +36,11 @@ export const useCompanyGetByIDRequest = () => {
 
 
   const mutation = useMutation<
-    getCompaniesResponse,
+  getCompanyByIdResponse,
     AxiosError,
     number // 👈 page number as argument
   >({
-    mutationFn: (id) => GetCompanyRequest(id),
+    mutationFn: (id) => GetCompanyByIDRequest(id),
     onError: (error) => {
       show(error.message, "error");
     },

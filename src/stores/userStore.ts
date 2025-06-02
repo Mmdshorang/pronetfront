@@ -2,7 +2,6 @@ import { User, Skill, Achievement } from "@/types/server/user";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-
 interface UserInfoStore {
   isLoggedIn: boolean;
   user: User | null;
@@ -12,7 +11,7 @@ interface UserInfoStore {
 
   addSkill: (skill: Skill) => void;
   removeSkill: (skillId: number) => void;
-  updateUserInfo: (updated: Partial<User>) => void; 
+  updateUserInfo: (updated: Partial<User>) => void;
   addAchievement: (achievement: Achievement) => void;
   removeAchievement: (achievementId: number) => void;
 }
@@ -30,14 +29,14 @@ export const useUserInfoStore = create<UserInfoStore>()(
           user,
           token,
         })),
-        updateUserInfo: (updated) => {
-          const { user } = get();
-          if (!user) return;
-        
-          set(() => ({
-            user: { ...user, ...updated }, // فقط مقادیر جدید رو merge می‌کنه
-          }));
-        },
+      updateUserInfo: (updated) => {
+        const { user } = get();
+        if (!user) return;
+
+        set(() => ({
+          user: { ...user, ...updated }, // فقط مقادیر جدید رو merge می‌کنه
+        }));
+      },
       clearUser: () => {
         localStorage.clear();
         sessionStorage.clear();
@@ -83,7 +82,9 @@ export const useUserInfoStore = create<UserInfoStore>()(
         const { user } = get();
         if (!user) return;
 
-        const updatedAchievements = user.achievements.filter((a) => a.id !== achievementId);
+        const updatedAchievements = user.achievements.filter(
+          (a) => a.id !== achievementId
+        );
         set(() => ({
           user: { ...user, achievements: updatedAchievements },
         }));

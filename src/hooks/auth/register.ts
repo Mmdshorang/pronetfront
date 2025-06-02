@@ -8,9 +8,15 @@ import { useUserInfoStore } from "@/stores/userStore";
 import { useRouter } from "next/navigation";
 export const useRegisterRequest = () => {
   const { show } = useSnackbarStore();
+  const router =useRouter()
   const mutation = useMutation<AuthResponse, AxiosError, RegisterData>({
     mutationFn: (data) => RegisterRequest(data),
-
+    onSuccess: (data) => {
+      if(data.status === "success") {
+        show(data.message, "success");
+        router.push("/")
+      }
+    },
     onError: (error) => {
       show(error.message, "error");
     },
@@ -25,7 +31,9 @@ export const useLoginRequest = () => {
   const router = useRouter();
   const mutation = useMutation<AuthResponse, AxiosError, LoginData>({
     mutationFn: (data) => loginRequest(data),
+
     onSuccess: (data) => {
+      
       if (data.status === "success") {
         addUser(data.data.user, data.data.token);
         router.push("/");
@@ -49,7 +57,7 @@ export const useLoginAdminRequest = () => {
       if (data.status === "success") {
         if (data.data.user.role === "admin") {
           addUser(data.data.user, data.data.token);
-          router.push("/admin/home");
+          router.replace("/admin/home");
         } else {
           show("شما ادمین نیستید", "error");
 

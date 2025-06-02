@@ -5,6 +5,7 @@ import { useEffect, useState, useCallback } from "react";
 import axios, { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import useSnackbarStore from "@/stores/snackbarStore";
+import { useUserInfoStore } from "@/stores/userStore";
 
 // import { useUserInfoStore } from "@/stores/loginStore";
 
@@ -15,7 +16,7 @@ interface Props {
 
 const AxiosProvider = ({ children }: Props) => {
   const [baseURL, setBaseURL] = useState<string | null>(null);
-  // const token = useUserInfoStore((state) => state.user?.Tokens);
+   const token = useUserInfoStore((state) => state.token);
   const router = useRouter();
 
   const { show } = useSnackbarStore();
@@ -52,11 +53,11 @@ const AxiosProvider = ({ children }: Props) => {
 
     axios.defaults.baseURL = `${baseURL}/api/`;
 
-    // if (token && token.trim()) {
-    //   axios.defaults.headers.common["Token"] = token;
-    // } else {
-    //   delete axios.defaults.headers.common["Token"];
-    // }
+    if (token && token.trim()) {
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    } else {
+      delete axios.defaults.headers.common["Authorization"];
+    }
 
     const responseInterceptor = axios.interceptors.response.use(
       (response) => {

@@ -9,14 +9,15 @@ interface FormData {
     onBack: () => void;
 }
 const Register: React.FC<FormData> = ({ onBack }) => {
-    const { mutate, isPending, error } = useRegisterRequest();
+    const { mutate, isPending, error,data } = useRegisterRequest();
     const navigate = useRouter();
     const [formData, setFormData] = useState<RegisterData>({
         name: '',
         email: '',
         password: '',
         password_confirmation: '',
-        location: null,
+        city: null,
+        country: null
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -31,6 +32,7 @@ const Register: React.FC<FormData> = ({ onBack }) => {
         e.preventDefault();
         try {
             await mutate(formData);
+            if(data)
             navigate.push('/');
         } catch (err) {
             // Error is handled by React Query
@@ -113,9 +115,20 @@ const Register: React.FC<FormData> = ({ onBack }) => {
                         <FaMapMarkerAlt className="absolute top-3 left-3 text-gray-400" />
                         <input
                             type="text"
-                            name="location"
-                            placeholder="شناسه مکان (اختیاری)"
-                            value={formData.location ?? ''}
+                            name="country"
+                            placeholder="استان (اختیاری)"
+                            value={formData.country ?? ''}
+                            onChange={handleChange}
+                            className="pl-10 w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                    </div>
+                    <div className="relative">
+                        <FaMapMarkerAlt className="absolute top-3 left-3 text-gray-400" />
+                        <input
+                            type="text"
+                            name="city"
+                            placeholder=" شهر (اختیاری)"
+                            value={formData.city ?? ''}
                             onChange={handleChange}
                             className="pl-10 w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />

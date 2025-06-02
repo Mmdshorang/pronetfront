@@ -17,7 +17,7 @@ export default function HomePage() {
     },
     {
       icon: <FaChartLine size={24} />,
-      text: 'نمایش آمار',
+      text: 'حذف شرکت',
       onClick: () => setOpenStatsDialog(true),
     },
   ];
@@ -35,7 +35,7 @@ export default function HomePage() {
           setOpenAddCompany(false);
         }}
       />
-
+    
       {/* می‌تونی یه دیالوگ دیگه هم برای آمار اضافه کنی */}
       {/* <StatsDialog open={openStatsDialog} onClose={() => setOpenStatsDialog(false)} /> */}
     </>
