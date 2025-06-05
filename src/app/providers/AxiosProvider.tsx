@@ -30,6 +30,7 @@ const AxiosProvider = ({ children }: Props) => {
 
   const handleError = useCallback(
     (error: AxiosError) => {
+      console.log(error);
       if (!error.response) {
         show("شما آفلاین هستید. اتصال خود را بررسی کنید.", "error");
       }

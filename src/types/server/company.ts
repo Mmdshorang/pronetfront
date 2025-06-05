@@ -1,5 +1,6 @@
 // types/company.ts
 
+import { RatingSubmission } from "../model/type";
 import { Achievement, Location, Skill } from "./user";
 
 //add company input
@@ -38,8 +39,8 @@ export interface getCompany {
   industry: string;
   city: string;
   logo: string;
-  ratings_count:number;
-  avg_rating: number;
+  ratings:RatingSubmission[];
+  overallAverageRating: number;
 }
 
 
@@ -61,100 +62,62 @@ export interface getCompaniesResponse {
 
 
 //company datalis
-export interface ReviewerType {
-  id: number;
-  name: string;
-  email: string;
-  email_verified_at: string;
-  profile_photo: string | null;
-  role: string;
-  location_id: number;
-  bio: string | null;
-  phone: string | null;
-  linkedin_url: string | null;
-  github_url: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface RatingCriteriaPivot {
-  company_rating_id: number;
-  rating_criteria_id: number;
-  score: number;
-  comment: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface RatingCriteria {
-  id: number;
-  name: string;
-  description: string;
-  category: string;
-  created_at: string;
-  updated_at: string;
-  pivot: RatingCriteriaPivot;
+export interface CriterionScore {
+  criterion: string; // عنوان معیار
+  score: number;      // امتیاز داده‌شده به آن معیار
 }
 
 export interface CompanyRating {
-  id: number;
-  company_id: number;
-  reviewer_id: number;
-  overall_rating: number;
-  comment: string;
-  created_at: string;
-  updated_at: string;
-  reviewer: ReviewerType;
-  criteria: RatingCriteria[];
+  id: string;
+  rater: string;
+  comment: string | null;
+  timestamp: string; // ISO datetime string
+  criteria: CriterionScore[];
+  averageScore: number;
 }
 
-export interface CompanyDetails {
-  id: number;
+export interface CompanyDetail {
+  id: string;
   name: string;
-  email: string;
-  location_id: number;
-  logo: string;
-  description: string;
-  industry: string;
-  website: string;
-  phone: string;
-  created_at: string;
-  updated_at: string;
-  location: Location;
+  description: string | null;
+  industry: string | null;
+  logo: string | null;
+  city: string | null;
+  country: string | null;
+  website: string | null;
+  phone: string | null;
   ratings: CompanyRating[];
 }
 
-export interface getCompanyByIdResponse {
+export interface CompanyShowResponse {
   status: 'success' | 'error';
   message: string;
-  data: {
-    company: CompanyDetails;
+  data?: {
+    company: CompanyDetail;
+    average_rating: number | null;
     ratings_count: number;
-    average_rating:number
   };
+  error?: string;
 }
-
 
 
 
 
 //employee for company
 
-export interface EmployeeType {
+export interface CompanyEmployee {
   id: number;
   name: string;
   email: string;
   profile_photo: string | null;
-  skills: Skill[]; // یا می‌توان از نوع دیگری استفاده کرد اگر مهارت‌ها شیء باشند
-  achievements: Achievement[]; // مشابه بالا
-  location: Location | null; // یا می‌تواند نوع دیگری باشد اگر لوکیشن شیء باشد
 }
 
 export interface CompanyEmployeesResponse {
-  status: string;
+  status: 'success' | 'error';
   message: string;
   data: {
-    employees: EmployeeType[];
+    employees: CompanyEmployee[];
     total_employees: number;
   };
+  error?: string; // فقط در حالت error وجود دارد
 }

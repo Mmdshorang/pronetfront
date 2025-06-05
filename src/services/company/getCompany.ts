@@ -1,7 +1,7 @@
 
 import { showSnackbar } from "@/stores/snackbarStore";
 import { StatusCodes } from "@/types/model/generic";
-import {  getCompaniesResponse, getCompanyByIdResponse } from "@/types/server/company";
+import {  CompanyShowResponse, getCompaniesResponse } from "@/types/server/company";
 import axios from "axios";
 
   export const GetCompanyRequest = async (page: number = 1): Promise<getCompaniesResponse> => {
@@ -9,7 +9,7 @@ import axios from "axios";
     const response = await axios.post(`/get-companies?page=${page}`);
     console.log(response)
     const result = response.data;
-
+console.log(result)
     if (result?.status === StatusCodes.Success) {
         showSnackbar(result?.message, "success");
       } else {
@@ -18,7 +18,7 @@ import axios from "axios";
     return response.data;
   };
   
-  export const GetCompanyByIDRequest = async (id: number): Promise<getCompanyByIdResponse> => {
+  export const GetCompanyByIDRequest = async (id: number): Promise<CompanyShowResponse> => {
     try {
       const response = await axios.post(`/companies/${id}`);
       const result = response.data;
@@ -39,7 +39,7 @@ import axios from "axios";
   
   
 
-   export const deleteCompaniesRequest = async (id: number): Promise<getCompanyByIdResponse> => {
+   export const deleteCompaniesRequest = async (id: number): Promise<CompanyShowResponse> => {
     try {
       const response = await axios.delete(`/companies/${id}`);
       const result = response.data;

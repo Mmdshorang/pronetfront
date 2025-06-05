@@ -2,7 +2,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useSnackbarStore from "@/stores/snackbarStore";
-import { getCompaniesResponse, getCompanyByIdResponse } from "@/types/server/company";
+import { CompanyShowResponse, getCompaniesResponse } from "@/types/server/company";
 import { GetCompanyByIDRequest, GetCompanyRequest } from "@/services/company/getCompany";
 import useCompanyStore from "@/stores/companyStore";
 
@@ -36,7 +36,7 @@ export const useCompanyGetByIDRequest = () => {
 
 
   const mutation = useMutation<
-  getCompanyByIdResponse,
+  CompanyShowResponse,
     AxiosError,
     number // 👈 page number as argument
   >({

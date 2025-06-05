@@ -52,22 +52,6 @@ export interface UserRating {
     created_at: string;
     updated_at: string;
   }
-
-  export interface UserBase {
-    id: number;
-    name: string;
-    email: string;
-    role: string;
-    bio:string;
-    phone: string;
-    linkedin_url: string;
-    github_url: string | null;
-    profile_photo: string | null;
-    email_verified_at?: string | null;
-    location: Location | null;
-    created_at?: string;
-    updated_at?: string;
-}
 export interface User {
     id: number;
     name: string;
@@ -94,6 +78,22 @@ export interface UserResponse {
     data?: User;
     error?: string;
 } 
+  export interface UserBase {
+    id: number;
+    name: string;
+    email: string;
+    role: string;
+    bio:string;
+    phone: string;
+    linkedin_url: string;
+    github_url: string | null;
+    profile_photo: string | null;
+    email_verified_at?: string | null;
+    location: Location | null;
+    created_at?: string;
+    updated_at?: string;
+}
+
 
 
 
