@@ -70,6 +70,7 @@ export interface User {
     achievements: Achievement[];
     received_ratings: UserRating[];
     companies: Company[];
+    admin_companies:number[];
 }
 
 export interface UserResponse {

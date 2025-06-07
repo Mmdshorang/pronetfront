@@ -17,11 +17,7 @@ export const CompanyAddRequest = async (
   });
 
 
-    const response = await axios.post(getApiUrl("v1", "companyCreate"), fd, {
-      headers: {
-        "Content-Type": "multipart/form-data"
-      }
-    });
+    const response = await axios.post(getApiUrl("v1", "companyCreate"), fd);
 
     const result = response.data;
     if (result?.status === StatusCodes.Success) {

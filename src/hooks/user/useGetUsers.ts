@@ -2,8 +2,8 @@
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useSnackbarStore from "@/stores/snackbarStore";
-import { UserListResponse } from "@/types/model/type";
-import { getUsersRequest } from "@/services/user/getusers";
+import { UserListResponse, UserProfileData, UserProfileDataResponse } from "@/types/model/type";
+import { getUserByIdRequest, getUsersRequest } from "@/services/user/getusers";
 import useUserStore from "@/stores/employStore";
 export const useEmployRequest = () => {
   const { show } = useSnackbarStore();
@@ -23,3 +23,25 @@ export const useEmployRequest = () => {
 
   return mutation;
 };
+
+
+export const useUserGetByIDRequest = () => {
+  const { show } = useSnackbarStore();
+
+
+  const mutation = useMutation<
+  UserProfileDataResponse,
+    AxiosError,
+    number // 👈 page number as argument
+  >({
+    mutationFn: (id) => getUserByIdRequest(id),
+    onError: (error) => {
+      show(error.message, "error");
+    },
+  });
+
+  return mutation;
+};
+
+
+  

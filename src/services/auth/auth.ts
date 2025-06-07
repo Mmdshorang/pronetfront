@@ -14,7 +14,7 @@ export const loginRequest = async (
   });
   console.log(formData)
   const response = await axios.post(getApiUrl("v1", "login"), formData);
-  console.log(response+ "+ 1");
+  console.log(response);
   const result = response.data;
   
   if (result?.status === StatusCodes.Success) {

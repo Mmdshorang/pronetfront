@@ -3,7 +3,7 @@
 import Head from 'next/head';
 import Image from 'next/image'; // برای بهینه‌سازی تصاویر Next.js
 import { FaBuilding, FaGlobe, FaPhone, FaMapMarkerAlt, FaStar, FaUserCircle, FaEnvelope, FaIndustry, FaCommentDots, FaCalendarAlt, FaListUl } from 'react-icons/fa';
-import type { CompanyRating, CompanyEmployee, CompanyShowResponse, CompanyEmployeesResponse } from '../../../types/server/company'; // مسیر را به فایل تایپ‌های خود تغییر دهید
+import type { CompanyRating, CompanyEmployee } from '../../../types/server/company'; // مسیر را به فایل تایپ‌های خود تغییر دهید
 import { use, useEffect } from 'react';
 import { useCompanyGetByIDRequest } from '@/hooks/company/getCompany';
 import { useCompanyEmployeesGetByIDRequest } from '@/hooks/company/getCompanyEmployees';
@@ -255,61 +255,3 @@ const CompanyDetailPage = ({ params }: CompanyDetailPageProps) => {
 
 export default CompanyDetailPage;
 
-// برای استفاده از این کامپوننت، باید داده‌های شرکت و کارمندان را به آن پاس دهید.
-// مثال نحوه استفاده (مثلا در getServerSideProps یا getStaticProps یا یک Client Component دیگر که داده‌ها را fetch می‌کند):
-/*
-// فرض کنید این داده‌ها از API شما آمده‌اند
-const sampleCompanyShowResponseData: CompanyShowResponse['data'] = {
-  company: {
-    id: '1',
-    name: 'شرکت فناوری پیشرو پارس',
-    description: 'شرکت فناوری پیشرو پارس یک شرکت پیشرو در زمینه ارائه راهکارهای نوین نرم‌افزاری و مشاوره‌های تخصصی فناوری اطلاعات در ایران است. ما به دنبال تحول دیجیتال کسب‌وکارها با استفاده از جدیدترین تکنولوژی‌ها هستیم.\nما تیمی از متخصصان خلاق و متعهد هستیم که به کیفیت و نوآوری اهمیت می‌دهیم.',
-    industry: 'فناوری اطلاعات و نرم‌افزار',
-    logo: 'https://placehold.co/200x200/4A90E2/FFFFFF?text=PTP', // آدرس لوگوی واقعی شرکت
-    city: 'تهران',
-    country: 'ایران',
-    website: 'www.ptp.example.com',
-    phone: '۰۲۱-۱۲۳۴۵۶۷۸',
-    ratings: [
-      {
-        id: 'rating1',
-        rater: 'کاربر مهمان ۱',
-        comment: 'محیط کاری بسیار پویا و تیم حرفه‌ای. فرصت‌های یادگیری زیادی وجود دارد.',
-        timestamp: '2024-05-01T10:00:00Z',
-        criteria: [
-          { criterion: 'فرهنگ سازمانی', score: 5 },
-          { criterion: 'حقوق و مزایا', score: 4 },
-          { criterion: 'فرصت پیشرفت', score: 4.5 },
-        ],
-        averageScore: 4.5,
-      },
-      {
-        id: 'rating2',
-        rater: 'رضا احمدی',
-        comment: null,
-        timestamp: '2024-04-15T14:30:00Z',
-        criteria: [
-          { criterion: 'فرهنگ سازمانی', score: 4 },
-          { criterion: 'تعادل کار و زندگی', score: 3.5 },
-        ],
-        averageScore: 3.75,
-      },
-    ],
-  },
-  average_rating: 4.2,
-  ratings_count: 2,
-};
-
-const sampleCompanyEmployeesResponseData: CompanyEmployeesResponse['data'] = {
-  employees: [
-    { id: 1, name: 'سارا رضایی', email: 's.rezaei@example.com', profile_photo: 'https://placehold.co/100x100/FFC0CB/333333?text=SR' },
-    { id: 2, name: 'علی محمدی', email: 'a.mohammadi@example.com', profile_photo: null },
-    { id: 3, name: 'مریم حسینی', email: 'm.hosseini@example.com', profile_photo: 'https://placehold.co/100x100/ADD8E6/333333?text=MH' },
-  ],
-  total_employees: 3,
-};
-
-// ... در کامپوننت والد یا صفحه Next.js
-// return <CompanyDetailPage companyData={sampleCompanyShowResponseData} employeeData={sampleCompanyEmployeesResponseData} />;
-
-*/

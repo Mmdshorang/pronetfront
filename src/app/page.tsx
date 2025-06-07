@@ -62,17 +62,17 @@ const Home: NextPage = () => {
           </p>
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
             <Link
-              href="/register/company"
+              href="/login"
               className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold py-3 px-8 rounded-lg text-lg shadow-md hover:shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105"
             >
-              ثبت نام شرکت
+              ثبت نام
             </Link>
 
             <Link
-              href="/register/employee"
+              href="/prof"
               className="bg-transparent hover:bg-white hover:text-blue-700 border-2 border-white text-white font-semibold py-3 px-8 rounded-lg text-lg shadow-md hover:shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105"
             >
-              ثبت نام کارمند
+              ورود به برنامه
             </Link>
 
           </div>

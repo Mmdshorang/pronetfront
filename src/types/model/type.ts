@@ -1,3 +1,5 @@
+import { Achievement } from "../server/user";
+
 export interface RatingCriterionValue {
   criterionId: string; // شناسه معیار مانند 'professionalism'
   score: number;       // امتیاز داده شده (مثلا 1 تا 5)
@@ -58,83 +60,58 @@ export const RATING_CRITERIA_DEFINITIONS: RatingCriterionDefinition[] = [
 ];
 
 // --- انواع داده جدید برای پروفایل کاربری دقیق ---
-export interface Location {
-  id?: number; // ممکن است در زمان ایجاد وجود نداشته باشد
+
+export interface WorkExperience {
+  id: number;
+  name: string;
+  website: string;
+  description: string;
+  pivot: {
+    job_title: string;
+    start_date: string;
+    end_date: string | null;
+    description: string;
+    employment_type: string;
+  };
+}
+
+interface Rating {
+  id: number;
+  reviewer_id: number;
+  reviewer_name: string;
+  reviewer_avatarUrl: string;
+  overall_rating: number;
+  comment: string;
+  created_at: string;
+}
+interface Location {
   city: string;
   country: string;
-  created_at?: string;
-  updated_at?: string;
 }
 
-export interface Skill {
-  id: number; // شناسه مهارت در دیتابیس
-  // user_id: number; // این فیلد در User.skills وجود دارد، شاید اینجا لازم نباشد اگر همیشه در کانتکست کاربر است
-  name: string;
-  // created_at: string; // این فیلدها ممکن است برای نمایش در فرانت‌اند لازم نباشند
-  // updated_at: string;
-}
-
-export interface Achievement {
-  id: number; // شناسه دستاورد در دیتابیس
-  // user_id: number;
-  title: string;
-  description: string;
-  date: string; // فرمت تاریخ باید مشخص شود (e.g., "YYYY-MM-DD")
-  issuer: string; // صادر کننده گواهی یا دستاورد
-  // created_at: string;
-  // updated_at: string;
-}
-
-export interface CompanyPivotJob { // اطلاعات مربوط به شغل در یک شرکت خاص
-  job_title: string;
-  start_date: string; // فرمت "YYYY-MM-DD"
-  end_date: string | null; // null اگر شغل فعلی باشد
-  description: string | null;
-  employment_type: string; // e.g., "Full-time", "Part-time"
-}
-
-export interface CompanyWorkExperience { // برای نمایش سابقه کاری
-  id: number; // شناسه شرکت در دیتابیس
-  name: string;
-  description: string | null;
-  website: string | null;
-  location_id: number | null; // اگر شرکت لوکیشن مجزا دارد
-  // created_at: string;
-  // updated_at: string;
-  pivot: CompanyPivotJob; // اطلاعات شغل در این شرکت
-  location?: Location; // اطلاعات مکان شرکت (اختیاری، اگر بخواهید همراه با شرکت لود شود)
-}
-
-export interface UserRating { // امتیازی که کاربر دریافت کرده
+interface Skill {
   id: number;
-  // user_id: number; // کاربری که امتیاز را دریافت کرده
-  reviewer_id: number; // کاربری که امتیاز داده
-  reviewer_name?: string; // نام امتیاز دهنده (برای نمایش)
-  reviewer_avatarUrl?: string; // آواتار امتیاز دهنده
-  overall_rating: number; // امتیاز کلی (مثلا 1 تا 5)
-  comment: string;
-  created_at: string; // تاریخ ثبت امتیاز
-  // updated_at: string;
-  // criteria_ratings?: RatingCriterionValue[]; // اگر امتیازات جزئی هم ذخیره می‌شوند
+  name: string;
 }
-
-// این User برای صفحه پروفایل شخصی کاربر استفاده می‌شود
 export interface UserProfileData {
   id: number;
   name: string;
   email: string;
-  role: string; // e.g., "Software Engineer", "Project Manager"
+  role: string;
   bio: string | null;
   phone: string | null;
   linkedin_url: string | null;
-  github_url: string | null;
-  profile_photo_url: string | null; // تغییر نام برای وضوح بیشتر
-  email_verified_at?: string | null;
-  location: Location | null;
-  // created_at?: string;
-  // updated_at?: string;
+  github_url: string;
+  profile_photo_url: string | null;
+  email_verified_at: string;
+  location: Location;
   skills: Skill[];
   achievements: Achievement[];
-  received_ratings: UserRating[]; // امتیازاتی که این کاربر دریافت کرده
-  work_experience: CompanyWorkExperience[]; // تغییر نام از companies برای وضوح
+  work_experience: WorkExperience[];
+  received_ratings: Rating[];
+}
+export interface UserProfileDataResponse {
+    status: string;
+    message: string;
+    data: UserProfileData;
 }

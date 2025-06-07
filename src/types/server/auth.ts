@@ -25,3 +25,8 @@ export interface AuthResponse {
       token: string;
   };
 }
+export interface OKResponse {
+  status: 'success' | 'error';
+  message: string;
+  
+}
