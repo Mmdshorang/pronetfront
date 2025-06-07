@@ -59,7 +59,7 @@ const PublicProfilePage: NextPage<CompanyDetailPageProps> = ({ params }) => {
           />
           <div className="flex-grow">
             <h1 className="text-3xl lg:text-4xl font-bold mb-1">{data?.data?.name}</h1>
-            <p className="text-lg lg:text-xl text-blue-200 dark:text-indigo-300 font-medium mb-3">{data?.data?.role}</p>
+            <p className="text-lg lg:text-xl text-blue-200 dark:text-indigo-300 font-medium mb-3">{data?.data?.job_title}</p>
             <div className="flex flex-wrap justify-center md:justify-start gap-x-5 gap-y-2 text-sm text-blue-100 dark:text-indigo-200">
               {data?.data?.email && (
                 <a href={`mailto:${data.data?.email}`} className="hover:text-yellow-300 flex items-center transition-colors">

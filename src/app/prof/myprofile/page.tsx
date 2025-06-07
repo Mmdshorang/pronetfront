@@ -1,7 +1,7 @@
 // pages/my-profile.tsx
 'use client';
-import { CompanyWorkExperience, UserProfileData } from '@/types/model/type';
-import { Achievement, Company, Skill, User } from '@/types/server/user';
+
+import { Achievement, Company, User, UserUpdate } from '@/types/server/user';
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import { useState, useEffect, ChangeEvent, Fragment, FormEvent } from 'react';
@@ -15,6 +15,10 @@ import { FiUploadCloud } from 'react-icons/fi';
 import { Dialog, Transition } from '@headlessui/react'; // برای مودال‌ها
 import { useUserInfoStore } from '@/stores/userStore';
 import { useUpdateProfileRequest } from '@/hooks/user/updateProfile';
+import { addAchievementsRequest, addskillssRequest, addWorkHistoryRequest, deleteAchievementsRequest, deleteskillssRequest, deleteWorkHistoryRequest, updateProfileImageRequest, updateWorkHistoryRequest } from '@/services/user/updaeProfile';
+import { showSnackbar } from '@/stores/snackbarStore';
+import { StatusCodes } from '@/types/model/generic';
+import CompanySearchInput from '@/components/dialogs/CompanySearchInput';
 
 interface EditableSectionProps {
   title: string;
@@ -112,6 +116,15 @@ const WorkExperienceModal: React.FC<WorkExperienceModalProps> = ({ isOpen, onClo
     onSubmit(experience);
     onClose();
   };
+  const handleCompanySelect = (company: { id: number | null; name: string; website?: string | null }) => {
+    setExperience(prev => ({
+      ...prev,
+      id: company.id ?? prev.id, // اگر null بود، مقدار قبلی را نگه می‌دارد
+      name: company.name,
+      website: company.website ?? prev.website ?? '',
+    }));
+  };
+
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -128,8 +141,10 @@ const WorkExperienceModal: React.FC<WorkExperienceModalProps> = ({ isOpen, onClo
                 </Dialog.Title>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
-                    <label htmlFor="companyName" className="block text-sm font-medium text-gray-700 dark:text-gray-300">نام شرکت</label>
-                    <input type="text" name="name" id="companyName" value={experience.name} onChange={handleChange} required className="mt-1 input-style" />
+                    <CompanySearchInput
+                      initialValue={experience.name}
+                      onCompanySelect={handleCompanySelect}
+                    />
                   </div>
                   <div>
                     <label htmlFor="job_title" className="block text-sm font-medium text-gray-700 dark:text-gray-300">عنوان شغلی</label>
@@ -265,10 +280,10 @@ const MyProfilePage: NextPage = () => {
 
   // const [user, setUser] = useState<UserProfileData | null>(null);
   const { user, updateUserInfo } = useUserInfoStore((state) => state)
-
+  const { mutate, isPending } = useUpdateProfileRequest();
 
   // States for edit mode of sections (فقط برای اطلاعات شخصی)
-  const [isEditingPersonalInfo, setIsEditingPersonalInfo] = useState(false);
+  const [isEditingPersonalInfo, setIsEditingPersonalInfo] = useState(true);
 
   // States for modals
   const [isWorkExpModalOpen, setIsWorkExpModalOpen] = useState(false);
@@ -292,42 +307,52 @@ const MyProfilePage: NextPage = () => {
     }
   };
 
-  const handleProfilePhotoChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleProfilePhotoChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
 
     if (!file || !user) return;
 
-    const reader = new FileReader();
+    try {
+      const data = await updateProfileImageRequest(file);
+      console.log(data)
+      if (data.status === StatusCodes.Success) {
+        showSnackbar(data.message, 'success');
 
-    reader.onloadend = () => {
-      const result = reader.result;
-      if (typeof result === 'string') {
-        useUserInfoStore.getState().updateUserInfo({ profile_photo: result });
+        // نمایش پیش‌نمایش تصویر بعد از موفقیت
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const result = reader.result;
+          if (typeof result === 'string') {
+            useUserInfoStore.getState().updateUserInfo({ profile_photo: data.profile_photo_url ?? '' });
+          }
+        };
+        reader.readAsDataURL(file);
+      } else {
+        showSnackbar(data.message, 'error');
       }
-    };
-
-    reader.readAsDataURL(file);
+    } catch (error) {
+      showSnackbar('خطا در آپلود عکس پروفایل', 'error');
+      console.error(error);
+    }
   };
 
-  const { addSkill } = useUserInfoStore();
-  const handleAddSkill = () => {
+  const { setSkills } = useUserInfoStore();
+  const handleAddSkill = async () => {
     if (!user || !newSkill.trim()) return;
     if (user.skills.find(s => s.name.toLowerCase() === newSkill.trim().toLowerCase())) return;
 
-    const newSkillObject: Skill = {
-      id: Date.now(),
-      name: newSkill.trim(),
-      user_id: user.id,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
-    addSkill(newSkillObject);
+    await addskillssRequest(newSkill.trim()).then((res) => {
+      if (res) {
+        setSkills(res);
+      }
+    })
     setNewSkill('');
   };
 
 
   const { removeSkill } = useUserInfoStore();
-  const handleRemoveSkill = (skillId: number) => {
+  const handleRemoveSkill = async (skillId: number) => {
+    deleteskillssRequest(skillId)
     removeSkill(skillId);
   };
 
@@ -337,38 +362,56 @@ const MyProfilePage: NextPage = () => {
     setEditingWorkExp(exp || null);
     setIsWorkExpModalOpen(true);
   };
-  const handleWorkExpSubmit = (submittedExp: Company) => {
+
+const handleWorkExpSubmit = async (submittedExp: Company) => {
+  if (!user) return;
+
+  try {
+    // تشخیص بین حالت افزودن و ویرایش بر اساس وجود ID
+    if (submittedExp.id && typeof submittedExp.id === 'number') {
+      // --- حالت ویرایش ---
+      const response = await addWorkHistoryRequest( submittedExp);
+        const updatedCompanies = [...user.companies, response.company];
+      
+      updateUserInfo({ ...user, companies: updatedCompanies });
+      // state را با داده‌های جدیدی که از سرور آمده، به‌روز کن
+    
+
+    } else {
+      // --- حالت افزودن ---
+       if (submittedExp.id && typeof submittedExp.id === 'number') {
+      const response = await updateWorkHistoryRequest(submittedExp.id,submittedExp);
+  const updatedCompanies = user.companies.map(company => 
+        company.id === response.company.id ? response.company : company
+      );
+    
+      updateUserInfo({ ...user, companies: updatedCompanies });
+       }
+      }
+  } catch (error) {
+    // خطاها قبلاً با showSnackbar نمایش داده شده‌اند
+    console.log("عملیات ناموفق بود.");
+  }
+};
+
+/**
+ * تابع برای مدیریت حذف سابقه شغلی
+ */
+const handleRemoveWorkExperience = async (companyId: number) => {
     if (!user) return;
 
-    const existingCompanyIndex = user.companies.findIndex(exp => exp.id === submittedExp.id);
+    try {
+        await deleteWorkHistoryRequest(companyId);
+        
+        // آیتم حذف شده را از state محلی نیز حذف کن
+        const updatedCompanies = user.companies.filter(company => company.id !== companyId);
+        updateUserInfo({ ...user, companies: updatedCompanies });
 
-    if (existingCompanyIndex !== -1) {
-      // Edit mode
-      const updatedCompanies = [...user.companies];
-      updatedCompanies[existingCompanyIndex] = submittedExp;
-
-      updateUserInfo({
-        ...user,
-        companies: updatedCompanies,
-      });
-    } else {
-      // Add mode
-      updateUserInfo({
-        ...user,
-        companies: [
-          ...user.companies,
-          { ...submittedExp, id: Date.now() }, // اگر backend id را تولید می‌کند، این خط باید حذف شود
-        ],
-      });
+    } catch (error) {
+        console.log("حذف ناموفق بود.");
     }
-  };
+};
 
-  const handleRemoveWorkExperience = (id: number) => {
-    if (user && window.confirm('آیا از حذف این سابقه شغلی مطمئن هستید؟')) {
-      const updatedCompanies = user.companies.filter(company => company.id !== id);
-      updateUserInfo({ ...user, companies: updatedCompanies });
-    }
-  };
 
 
   // --- Achievement Handlers ---
@@ -376,7 +419,7 @@ const MyProfilePage: NextPage = () => {
     setEditingAchievement(ach || null);
     setIsAchievementModalOpen(true);
   };
-  const { addAchievement, removeAchievement } = useUserInfoStore();
+  const { setAchievement, removeAchievement } = useUserInfoStore();
 
   const handleAchievementSubmit = (submittedAch: Achievement) => {
     if (!user) return;
@@ -384,12 +427,20 @@ const MyProfilePage: NextPage = () => {
       const updated = user.achievements.map(a => a.id === submittedAch.id ? submittedAch : a);
       updateUserInfo({ achievements: updated });
     } else {
-      addAchievement({ ...submittedAch, id: Date.now() });
+      addAchievementsRequest(submittedAch).then((res) => {
+
+        if (res.status === StatusCodes.Success) {
+          console.log(res.achievements)
+          setAchievement(res.achievements ?? []);
+        }
+      })
+      //addAchievement({ ...submittedAch, id: Date.now() });
     }
   };
 
   const handleRemoveAchievement = (id: number) => {
     if (window.confirm('آیا از حذف این دستاورد مطمئن هستید؟')) {
+      deleteAchievementsRequest(id)
       removeAchievement(id);
     }
   };
@@ -397,22 +448,29 @@ const MyProfilePage: NextPage = () => {
 
   const handleCancelPersonalInfoEdit = () => {
 
-    setIsEditingPersonalInfo(false);
+    //  setIsEditingPersonalInfo(false);
   };
 
   const handleSavePersonalInfo = () => {
     // منطق ذخیره اطلاعات شخصی (مثلا ارسال به API)
     // if (user) setInitialUser(prev => prev ? { ...prev, ...JSON.parse(JSON.stringify(user)) } : null); // آپدیت initialUser
-    setIsEditingPersonalInfo(false);
+    // setIsEditingPersonalInfo(false);
     // alert('اطلاعات شخصی ذخیره شد.'); // این قسمت را بعدا با نوتیفیکیشن بهتر جایگزین کنید
   };
-const {mutate}=useUpdateProfileRequest();
+
   const handleSaveAll = () => {
     console.log("Saving user data:", user);
-  mutate(user);
-    setIsEditingPersonalInfo(false); // بستن همه بخش‌های ویرایش پس از ذخیره کلی
-    // ... بستن سایر مودال‌ها اگر باز هستند ...
-    alert('تمام اطلاعات با موفقیت (به صورت شبیه‌سازی شده) ذخیره شد!');
+    const updateInfo: UserUpdate = {
+      bio: user?.bio ?? '',
+      email: user?.email ?? '',
+      name: user?.name ?? '',
+      phone: user?.phone ?? '',
+      linkedin_url: user?.linkedin_url ?? '',
+      city: user?.location?.city ?? '',
+      country: user?.location?.country ?? '',
+      github_url: user?.github_url ?? '',
+    }
+    mutate(updateInfo);
   };
 
   if (!user) { /* ... (کد لودینگ همانند قبل) ... */
@@ -440,12 +498,33 @@ const {mutate}=useUpdateProfileRequest();
         {/* Profile Header (همانند قبل با تغییر جزئی در دکمه ذخیره کلی) */}
         <div className="bg-white dark:bg-gray-800 shadow-xl rounded-xl p-6 md:p-8 mb-8 flex flex-col sm:flex-row items-center space-y-6 sm:space-y-0 sm:space-x-8 sm:space-x-reverse">
           <div className="relative group">
-            <img src={user.profile_photo || 'https://placehold.co/150x150/cccccc/FFFFFF?text=User&font=arial'} alt={user.name} className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover border-4 border-blue-500 dark:border-blue-400 shadow-lg" onError={(e) => (e.currentTarget.src = 'https://placehold.co/150x150/cccccc/FFFFFF?text=Error&font=arial')} />
-            {(isEditingPersonalInfo) && ( /* فقط در حالت ویرایش اطلاعات شخصی فعال شود */
-              <label htmlFor="profilePhotoInput" className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <FiUploadCloud size={40} className="text-white" />
-                <input type="file" id="profilePhotoInput" className="hidden" accept="image/*" onChange={handleProfilePhotoChange} />
-              </label>
+            {/* تصویر پروفایل کاربر */}
+            <img
+              src={user.profile_photo || 'https://placehold.co/150x150/cccccc/FFFFFF?text=User&font=arial'}
+              alt={user.name}
+              className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover border-4 border-blue-500 dark:border-blue-400 shadow-lg"
+              onError={(e) => {
+                e.currentTarget.src = 'https://placehold.co/150x150/cccccc/FFFFFF?text=Error&font=arial';
+              }}
+            />
+
+            {/* اگر در حالت ویرایش باشیم، روی عکس کاور آپلود نمایش داده می‌شود */}
+            {isEditingPersonalInfo && (
+              <>
+                <label
+                  htmlFor="profilePhotoInput"
+                  className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                >
+                  <FiUploadCloud size={40} className="text-white" />
+                </label>
+                <input
+                  type="file"
+                  id="profilePhotoInput"
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleProfilePhotoChange}
+                />
+              </>
             )}
           </div>
           <div className="text-center sm:text-right flex-grow">
@@ -481,10 +560,7 @@ const {mutate}=useUpdateProfileRequest();
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">نام کامل</label>
                 <input type="text" name="name" id="name" value={user.name} onChange={handleInputChange} className={inputStyle} />
               </div>
-              <div>
-                <label htmlFor="role" className="block text-sm font-medium text-gray-700 dark:text-gray-300">عنوان شغلی</label>
-                <input type="text" name="role" id="role" value={user.role} onChange={handleInputChange} className={inputStyle} />
-              </div>
+       
               <div>
                 <label htmlFor="bio" className="block text-sm font-medium text-gray-700 dark:text-gray-300">درباره من (Bio)</label>
                 <textarea name="bio" id="bio" rows={5} value={user.bio || ''} onChange={handleInputChange} className={inputStyle} />

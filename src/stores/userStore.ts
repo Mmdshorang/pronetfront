@@ -8,10 +8,17 @@ interface UserInfoStore {
   token: string | null;
   addUser: (user: User, token: string) => void;
   clearUser: () => void;
+  setSkills: (skills: Skill[]) => void;
+  setAchievement: (achievement: Achievement[]) => void;
+  
+
+
 
   addSkill: (skill: Skill) => void;
   removeSkill: (skillId: number) => void;
   updateUserInfo: (updated: Partial<User>) => void;
+  updateUserInfo2: (updated: Partial<User>) => void;
+
   addAchievement: (achievement: Achievement) => void;
   removeAchievement: (achievementId: number) => void;
 }
@@ -37,6 +44,20 @@ export const useUserInfoStore = create<UserInfoStore>()(
           user: { ...user, ...updated }, // فقط مقادیر جدید رو merge می‌کنه
         }));
       },
+      updateUserInfo2: (updated) => {
+        const { user } = get();
+        if (!user) return;
+
+        // اگه profile_photo وجود داشت، به URL کامل تبدیلش کن
+        if (updated.profile_photo) {
+          updated.profile_photo = `http://localhost:8000/storage/${updated.profile_photo}`;
+        }
+
+        set(() => ({
+          user: { ...user, ...updated },
+        }));
+      },
+
       clearUser: () => {
         localStorage.clear();
         sessionStorage.clear();
@@ -47,7 +68,22 @@ export const useUserInfoStore = create<UserInfoStore>()(
           isLoggedIn: false,
         }));
       },
+      setSkills: (skills) => {
+        const { user } = get();
+        if (!user) return;
 
+        set(() => ({
+          user: { ...user, skills },
+        }));
+      },
+  setAchievement: (achievements) => {
+        const { user } = get();
+        if (!user) return;
+
+        set(() => ({
+          user: { ...user, achievements },
+        }));
+      },
       addSkill: (skill) => {
         const { user } = get();
         if (!user) return;

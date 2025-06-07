@@ -28,5 +28,5 @@ export interface AuthResponse {
 export interface OKResponse {
   status: 'success' | 'error';
   message: string;
-  
+  profile_photo_url?:string;
 }

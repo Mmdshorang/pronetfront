@@ -101,6 +101,7 @@ export interface UserProfileData {
   bio: string | null;
   phone: string | null;
   linkedin_url: string | null;
+  job_title: string | null;
   github_url: string;
   profile_photo_url: string | null;
   email_verified_at: string;

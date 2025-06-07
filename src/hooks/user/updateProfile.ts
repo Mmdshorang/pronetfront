@@ -7,11 +7,13 @@ import { UpdatedUserResponse, UserUpdate } from "@/types/server/user";
 import { useUserInfoStore } from "@/stores/userStore";
 export const useUpdateProfileRequest = () => {
   const { show } = useSnackbarStore();
-    const updateUserInfo = useUserInfoStore((state) => state.updateUserInfo);
+    const updateUserInfo2 = useUserInfoStore((state) => state.updateUserInfo2);
   const mutation = useMutation<UpdatedUserResponse, AxiosError, UserUpdate >({
     mutationFn: (data) => updateProfileRequest(data),
    onSuccess:(data)=>{
-      updateUserInfo(data.data)
+      updateUserInfo2(data.data)
+
+       show(data.message, "success");
    },
     onError: (error) => {
       show(error.message, "error");
