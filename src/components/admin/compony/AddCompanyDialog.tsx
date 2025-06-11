@@ -13,8 +13,7 @@ interface Props {
 const AddCompanyDialog = ({ open, onClose, onSuccess }: Props) => {
   const [formData, setFormData] = useState<CompanyAdd>({
     name: '',
-    email: '',
-    password: '',
+   
     city: '',
     country: '',
     logo: null,
@@ -91,7 +90,7 @@ const AddCompanyDialog = ({ open, onClose, onSuccess }: Props) => {
               <input
                 type={name === 'password' ? 'password' : 'text'}
                 name={name}
-                value={formData[name as 'name' | 'email' | 'password' | 'description' | 'industry' | 'website' | 'phone' | 'city' | 'country' ] ?? ''}
+                value={formData[name as 'name' | 'description' | 'industry' | 'website' | 'phone' | 'city' | 'country' ] ?? ''}
                 onChange={handleChange}
                 style={{
                   ...styles.input,

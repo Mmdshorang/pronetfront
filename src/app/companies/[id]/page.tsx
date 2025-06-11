@@ -1,104 +1,12 @@
 'use client';
-
 import Head from 'next/head';
-import Image from 'next/image'; // برای بهینه‌سازی تصاویر Next.js
-import { FaBuilding, FaGlobe, FaPhone, FaMapMarkerAlt, FaStar, FaUserCircle, FaEnvelope, FaIndustry, FaCommentDots, FaCalendarAlt, FaListUl } from 'react-icons/fa';
-import type { CompanyRating, CompanyEmployee } from '../../../types/server/company'; // مسیر را به فایل تایپ‌های خود تغییر دهید
+import { FaBuilding, FaGlobe, FaPhone, FaMapMarkerAlt, FaUserCircle, FaIndustry, FaCommentDots } from 'react-icons/fa';
+
 import { use, useEffect } from 'react';
 import { useCompanyGetByIDRequest } from '@/hooks/company/getCompany';
 import { useCompanyEmployeesGetByIDRequest } from '@/hooks/company/getCompanyEmployees';
-
-// کاپوننت کوچکی برای نمایش ستاره‌ها
-const StarRating: React.FC<{ score: number; maxScore?: number; className?: string }> = ({ score, maxScore = 5, className = '' }) => {
-  const fullStars = Math.floor(score);
-  const halfStar = score % 1 >= 0.5 ? 1 : 0;
-  const emptyStars = maxScore - fullStars - halfStar;
-  return (
-    <div className={`flex items-center ${className}`}>
-      {Array(fullStars).fill(0).map((_, i) => <FaStar key={`full-${i}`} className="text-yellow-400" />)}
-      {halfStar === 1 && <FaStar key="half" className="text-yellow-400" style={{ clipPath: 'inset(0 50% 0 0)' }} />}
-      {Array(emptyStars).fill(0).map((_, i) => <FaStar key={`empty-${i}`} className="text-gray-300" />)}
-      <span className="ml-2 text-sm font-medium text-gray-600 dark:text-gray-300">({score.toFixed(1)}/{maxScore})</span>
-    </div>
-  );
-};
-
-// کامپوننت برای نمایش یک کارت کارمند
-const EmployeeCard: React.FC<{ employee: CompanyEmployee }> = ({ employee }) => (
-  <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md hover:shadow-lg transition-transform transform hover:-translate-y-1 flex items-center space-x-4 space-x-reverse">
-    {employee.profile_photo ? (
-      <Image
-        src={employee.profile_photo}
-        alt={employee.name}
-        width={60}
-        height={60}
-        className="rounded-full object-cover border-2 border-gray-200 dark:border-gray-700"
-        onError={(e) => (e.currentTarget.src = 'https://placehold.co/60x60/cccccc/333333?text=E')}
-      />
-    ) : (
-      <FaUserCircle size={60} className="text-gray-400 dark:text-gray-500 rounded-full" />
-    )}
-    <div>
-      <h4 className="text-lg font-semibold text-gray-800 dark:text-white">{employee.name}</h4>
-      <a href={`mailto:${employee.email}`} className="text-sm text-blue-500 hover:text-blue-600 dark:hover:text-blue-400 flex items-center">
-        <FaEnvelope className="ml-1 rtl:mr-1 rtl:ml-0" />
-        {employee.email}
-      </a>
-    </div>
-  </div>
-);
-
-// کامپوننت برای نمایش یک کارت امتیاز
-const RatingCard: React.FC<{ rating: CompanyRating }> = ({ rating }) => {
-  const formatDate = (dateString: string) => {
-    try {
-      return new Date(dateString).toLocaleDateString('fa-IR', { year: 'numeric', month: 'long', day: 'numeric' });
-    } catch (e) {
-      return "تاریخ نامعتبر";
-    }
-  };
-
-  return (
-    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
-        <div>
-          <p className="text-lg font-semibold text-gray-800 dark:text-white">{rating.rater}</p>
-          <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center mt-1">
-            <FaCalendarAlt className="ml-1 rtl:mr-1 rtl:ml-0" />
-            {formatDate(rating.timestamp)}
-          </p>
-        </div>
-        <div className="mt-2 sm:mt-0">
-          <StarRating score={rating.averageScore} className="justify-end" />
-        </div>
-      </div>
-
-      {rating.comment && (
-        <p className="text-gray-700 dark:text-gray-300 italic mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-md">
-          <FaCommentDots className="inline ml-2 rtl:mr-2 rtl:ml-0 text-gray-500 dark:text-gray-400" />
-          {rating.comment}
-        </p>
-      )}
-
-      {rating.criteria && rating.criteria.length > 0 && (
-        <div>
-          <h5 className="text-md font-semibold text-gray-700 dark:text-gray-200 mb-2 flex items-center">
-            <FaListUl className="ml-2 rtl:mr-2 rtl:ml-0" />
-            معیارهای امتیازدهی:
-          </h5>
-          <ul className="space-y-2">
-            {rating.criteria.map((criterion, index) => (
-              <li key={index} className="flex justify-between items-center text-sm p-2 bg-gray-50 dark:bg-gray-700/50 rounded">
-                <span className="text-gray-600 dark:text-gray-300">{criterion.criterion}:</span>
-                <StarRating score={criterion.score} maxScore={5} className="text-xs" /> {/* فرض می کنیم امتیاز معیارها از 5 است */}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </div>
-  );
-};
+import RatingCard, { StarRating } from '@/components/admin/compony/RatingCard';
+import EmployeeCard from '@/components/admin/compony/EmployeeCard';
 
 
 interface CompanyDetailPageProps {

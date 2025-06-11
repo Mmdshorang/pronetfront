@@ -30,10 +30,11 @@ export interface AchievementResponse {
   achievements: Achievement[];
 }
 export interface Company {
-  id: number | null; // برای آیتم جدید می‌تواند null باشد
+  id: number; // برای آیتم جدید می‌تواند null باشد
   name: string;
   description: string | null;
   website: string | null;
+
   location_id: number | null;
   created_at: string;
   updated_at: string;
@@ -41,18 +42,26 @@ export interface Company {
 }
 
 export interface CompanyPivotJob {
+  user_id: number;
+  company_id: number;
   job_title: string;
   start_date: string;
   end_date: string | null;
   description: string | null;
   employment_type: string;
-  role: 'admin' | 'member'; // ✅ این فیلد اضافه شد
+  role: string; // ✅ این فیلد اضافه شد
 }
 
-// این نوع، داده‌ای است که به سمت سرور برای افزودن/ویرایش ارسال می‌شود
-// چون از Company مشتق شده، به صورت خودکار آپدیت می‌شود
 
-
+export interface AddUserInput {
+  user_id: number;
+  job_title: string;
+  start_date: string; // فرمت 'YYYY-MM-DD'
+  end_date?: string | null;
+  description?: string | null;
+  employment_type: 'تمام وقت' | 'پاره وقت' | 'قراردادی' | 'کارآموزی' | 'فریلنسری';
+  role: 'admin' | 'member';
+}
 export interface UserRating {
   id: number;
   user_id: number;
@@ -79,7 +88,7 @@ export interface User {
   achievements: Achievement[];
   received_ratings: UserRating[];
   companies: Company[];
-  admin_companies: number[];
+
 }
 
 export interface UserResponse {
@@ -129,7 +138,6 @@ export interface UserUpdate {
   city?: string; // 'sometimes|required|string|max:255' -> Optional string
   country?: string; // 'sometimes|required|string|max:255' -> Optional string
   github_url?: string;
- // 'nullable|url|max:255'
 }
 
 export interface UpdatedUserResponse {
@@ -155,14 +163,13 @@ export interface SearchResponse {
   currentPage: number;
 }
 
-
 //اضافه کردن سابقه شغلی
-export type WorkHistoryInput = Omit<Company, 'created_at' | 'updated_at'>;
+export type WorkHistoryInput = Omit<Company, "created_at" | "updated_at">;
 
 // این اینترفیس، پاسخ موفقیت‌آمیز از سرور است
 // چون از Company استفاده می‌کند، این هم به صورت خودکار صحیح است
 export interface WorkHistorySuccessResponse {
-  status: 'success';
+  status: "success";
   message: string;
-  company: Company; 
+  company: Company;
 }

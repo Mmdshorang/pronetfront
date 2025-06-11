@@ -1,7 +1,8 @@
 // types/company.ts
 
 import { RatingSubmission } from "../model/type";
-import { Achievement, Location, Skill } from "./user";
+import { Company, User } from "./user";
+
 
 //add company input
 
@@ -10,8 +11,6 @@ import { Achievement, Location, Skill } from "./user";
 export interface CompanyAdd {
     id?: number;
     name: string;
-    email: string;
-    password: string; // هش‌شده است، اما به هر حال در پاسخ آمده
     city:string;
     country:string;
     logo?: File | null;
@@ -23,14 +22,20 @@ export interface CompanyAdd {
     updated_at?: string; // ISO datetime string
   }
   
+//  * پاسخ برای ایجاد یا ویرایش موفق یک شرکت (متدهای store و update)
 
-export interface CompanyAddResponse {
-    status: "success" | "error";
-    message: string;
-    data: CompanyAdd;
-  }
+export interface CompanyMutationResponse {
+  status: 'success';
+  message: string;
+  company: Company;
+}
+
   
-
+export interface AddUserResponse {
+  status: 'success';
+  message: string;
+  user: User; // کاربری که به تازگی اضافه شده است
+}
 //get company home page
 // types.ts
 export interface getCompany {
@@ -120,4 +125,33 @@ export interface CompanyEmployeesResponse {
     total_employees: number;
   };
   error?: string; // فقط در حالت error وجود دارد
+}
+
+
+
+//add user to company
+export interface AddUserToCompanyResponse {
+  message: string;
+  user: CompanyUser;
+}
+
+export interface CompanyUser {
+  id: number;
+  name: string;
+  email: string;
+  profile_photo: string;
+  pivot: CompanyUserPivot;
+}
+
+export interface CompanyUserPivot {
+  company_id: number;
+  user_id: number;
+  job_title: string;
+  start_date: string; // e.g. "2024-10-01"
+  end_date: string | null;
+  description: string | null;
+  employment_type: 'تمام وقت' | 'پاره وقت' | 'قراردادی' | 'کارآموزی' | 'فریلنسری';
+  role: 'admin' | 'member';
+  created_at: string; // ISO timestamp
+  updated_at: string; // ISO timestamp
 }

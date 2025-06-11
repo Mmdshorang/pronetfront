@@ -1,26 +1,14 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Menu, ShoppingCart, Home, Folder, User, Box } from "lucide-react";
+import {  Home, Folder, User, Box } from "lucide-react";
 import Link from "next/link";
 import UserMenu from "../profile&login/UserMenu";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import Popover from "./PopoverCartBox";
 import { useUserInfoStore } from "@/stores/userStore";
 import DrawerNavigation from "../drawer/DrawerNavigation";
 const items = [
-  {
-    key: "cart",
-    label: "سبد خرید",
-    icon: <ShoppingCart className="w-5 h-5" />,
-    href: "/cart",
-  },
-  {
-    key: "menu",
-    label: "دسته بندی",
-    icon: <Menu className="w-5 h-5" />,
-    href: "/menu",
-  },
+
   {
     key: "home",
     label: "خانه",
@@ -28,16 +16,16 @@ const items = [
     href: "/",
   },
   {
-    key: "products",
-    label: "محصولات",
+    key: "prof",
+    label: "شرکت ها",
     icon: <Box className="w-5 h-5" />,
-    href: "/products",
+    href: "/prof",
   },
   {
-    key: "profile",
+    key: "prof/myprofile",
     label: "پروفایل",
     icon: <User className="w-5 h-5" />,
-    href: "/profile",
+    href: "/prof/myprofile",
   },
 ];
 
@@ -73,7 +61,7 @@ const Navbar: React.FC = () => {
                 alt="ShopLogo"
                 className="w-10 h-10"
               />
-              <p className="text-white">آدینا رایانه</p>
+              <p className="text-white"> پرونت</p>
             </div>
             <ul className="hidden lg:flex items-center gap-20 text-white text-gray-700 text-lg font-bold">
               <li>
@@ -87,20 +75,20 @@ const Navbar: React.FC = () => {
               </li>
               <li>
                 <Link
-                  href="/products"
+                  href="/prof"
                   className="flex items-center gap-2 hover:text-yellow-400"
                 >
                   <Box className="w-5 h-5" />
-                  محصولات
+                شرکت ها 
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/discounts"
+                  href="/prof/myprofile"
                   className="flex items-center gap-2 hover:text-yellow-400"
                 >
                   <Folder className="w-5 h-5" />
-                  تخفیفات شگفت انگیز
+                     پروفایل
                 </Link>
               </li>
             </ul>
@@ -122,10 +110,6 @@ const Navbar: React.FC = () => {
                     />
                   </svg>
                 </button>
-              </Link>
-
-              <Link href="/cart">
-                <Popover />
               </Link>
               {isLoggedIn ? (
                 <UserMenu />

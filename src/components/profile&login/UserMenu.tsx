@@ -23,16 +23,7 @@ const UserMenu = () => {
           <ul className="text-gray-700">
             <li>
               <Link
-                href="/orders"
-                className="flex items-center gap-2 p-3 hover:bg-gray-100 rounded-t-lg"
-              >
-                <ShoppingBag className="w-5 h-5" />
-                سفارشات من
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/profile"
+                href="/prof/myprofile"
                 className="flex items-center gap-2 p-3 hover:bg-gray-100"
               >
                 <Settings className="w-5 h-5" />

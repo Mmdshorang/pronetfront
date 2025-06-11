@@ -4,290 +4,34 @@
 import { Achievement, Company, User, UserUpdate } from '@/types/server/user';
 import type { NextPage } from 'next';
 import Head from 'next/head';
-import { useState, useEffect, ChangeEvent, Fragment, FormEvent } from 'react';
-// اطمینان حاصل کنید که مسیر types.ts صحیح است
+import { useState, ChangeEvent, Fragment } from 'react';
 import {
-  FaUserEdit, FaSave, FaTimesCircle, FaPlusCircle, FaTrashAlt,
+   FaSave, FaTimesCircle, FaTrashAlt,
   FaMapMarkerAlt, FaLinkedin, FaGithub, FaEnvelope, FaPhone, FaBriefcase,
   FaLightbulb, FaStar, FaCalendarAlt, FaBuilding, FaIdBadge, FaEdit
 } from 'react-icons/fa';
 import { FiUploadCloud } from 'react-icons/fi';
-import { Dialog, Transition } from '@headlessui/react'; // برای مودال‌ها
+import './style.css'
 import { useUserInfoStore } from '@/stores/userStore';
 import { useUpdateProfileRequest } from '@/hooks/user/updateProfile';
 import { addAchievementsRequest, addskillssRequest, addWorkHistoryRequest, deleteAchievementsRequest, deleteskillssRequest, deleteWorkHistoryRequest, updateProfileImageRequest, updateWorkHistoryRequest } from '@/services/user/updaeProfile';
 import { showSnackbar } from '@/stores/snackbarStore';
 import { StatusCodes } from '@/types/model/generic';
-import CompanySearchInput from '@/components/dialogs/CompanySearchInput';
+import EditableSection from '@/hooks/user/EditableSection';
+import WorkExperienceModal from '@/hooks/user/WorkExperienceModal';
+import AchievementModal from '@/hooks/user/AchievementModal';
 
-interface EditableSectionProps {
-  title: string;
-  icon: React.ReactElement;
-  children: React.ReactNode;
-  isEditing?: boolean; // دیگر برای کنترل فرم‌های داخلی استفاده نمی‌شود
-  onToggleEdit?: () => void; // ممکن است برای برخی بخش‌ها لازم باشد
-  onAddNew?: () => void; // برای دکمه افزودن جدید
-  canEdit?: boolean;
-  isSectionEditable?: boolean; // برای فعال/غیرفعال کردن دکمه ویرایش کلی بخش
-}
-
-const EditableSection: React.FC<EditableSectionProps> = ({
-  title, icon, children, onAddNew, canEdit = true, isSectionEditable = true, isEditing, onToggleEdit
-}) => (
-  <div className="bg-white dark:bg-gray-800 shadow-xl rounded-xl p-6 md:p-8 mb-8">
-    <div className="flex justify-between items-center mb-6">
-      <h2 className="text-2xl font-semibold text-gray-800 dark:text-white flex items-center">
-        {icon}
-        <span className="mr-3 rtl:ml-3 rtl:mr-0">{title}</span>
-      </h2>
-      {canEdit && (
-        <div className="flex items-center space-x-2 space-x-reverse">
-          {isSectionEditable && onToggleEdit && ( // دکمه ویرایش کلی بخش (مثلا برای اطلاعات شخصی)
-            isEditing ? (
-              <div className="flex space-x-2 space-x-reverse">
-                <button onClick={onToggleEdit} className="text-green-500 hover:text-green-700 p-2 rounded-full" title="ذخیره"><FaSave size={20} /></button>
-                <button onClick={onToggleEdit} className="text-red-500 hover:text-red-700 p-2 rounded-full" title="لغو"><FaTimesCircle size={20} /></button>
-              </div>
-            ) : (
-              <button onClick={onToggleEdit} className="text-blue-500 hover:text-blue-700 p-2 rounded-full" title="ویرایش بخش"><FaUserEdit size={20} /></button>
-            )
-          )}
-          {onAddNew && ( // دکمه افزودن آیتم جدید (برای مهارت، سابقه، دستاورد)
-            <button
-              onClick={onAddNew}
-              className="bg-blue-500 hover:bg-blue-600 text-white py-1.5 px-3 rounded-lg flex items-center text-sm shadow-md"
-              title={`افزودن ${title.replace('‌ها', '')}`}
-            >
-              <FaPlusCircle className="ml-1 rtl:mr-1 rtl:ml-0" /> افزودن
-            </button>
-          )}
-        </div>
-      )}
-    </div>
-    {children}
-  </div>
-);
-
-
-// --- مودال برای ویرایش/افزودن سابقه شغلی ---
-interface WorkExperienceModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (experience: Company) => void;
-  initialData?: Company | null;
-}
-
-const WorkExperienceModal: React.FC<WorkExperienceModalProps> = ({ isOpen, onClose, onSubmit, initialData }) => {
-  const [experience, setExperience] = useState<Company>(
-    initialData || {
-      id: initialData?.id ?? Date.now(), // اگر initialData وجود دارد از id آن استفاده کن، در غیر اینصورت id جدید بساز
-      name: '', website: '', description: '', location_id: null, created_at: '', updated_at: '',
-      pivot: { job_title: '', start_date: '', end_date: null, description: '', employment_type: 'تمام وقت' }
-    }
-  );
-
-  useEffect(() => {
-    if (isOpen) {
-      setExperience(
-        initialData || {
-          id: Date.now(), name: '', website: '', description: '', location_id: null, created_at: '', updated_at: '',
-          pivot: { job_title: '', start_date: '', end_date: null, description: '', employment_type: 'تمام وقت' }
-        }
-      );
-    }
-  }, [isOpen, initialData]);
-
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    if (name in experience.pivot) {
-      setExperience(prev => ({ ...prev, pivot: { ...prev.pivot, [name]: value } }));
-    } else {
-      setExperience(prev => ({ ...prev, [name]: value } as Company));
-    }
-  };
-
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    // اعتبارسنجی ساده
-    if (!experience.name.trim() || !experience.pivot.job_title.trim() || !experience.pivot.start_date.trim()) {
-      alert('لطفاً نام شرکت، عنوان شغلی و تاریخ شروع را وارد کنید.');
-      return;
-    }
-    onSubmit(experience);
-    onClose();
-  };
-  const handleCompanySelect = (company: { id: number | null; name: string; website?: string | null }) => {
-    setExperience(prev => ({
-      ...prev,
-      id: company.id ?? prev.id, // اگر null بود، مقدار قبلی را نگه می‌دارد
-      name: company.name,
-      website: company.website ?? prev.website ?? '',
-    }));
-  };
-
-
-  return (
-    <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={onClose} dir="rtl">
-        <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
-          <div className="fixed inset-0 bg-black bg-opacity-60" />
-        </Transition.Child>
-        <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4 text-center">
-            <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0 scale-95" enterTo="opacity-100 scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 scale-100" leaveTo="opacity-0 scale-95">
-              <Dialog.Panel className="w-full max-w-lg transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 p-6 text-right align-middle shadow-xl transition-all">
-                <Dialog.Title as="h3" className="text-xl font-semibold leading-6 text-gray-900 dark:text-white mb-4">
-                  {initialData ? 'ویرایش سابقه شغلی' : 'افزودن سابقه شغلی'}
-                </Dialog.Title>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div>
-                    <CompanySearchInput
-                      initialValue={experience.name}
-                      onCompanySelect={handleCompanySelect}
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="job_title" className="block text-sm font-medium text-gray-700 dark:text-gray-300">عنوان شغلی</label>
-                    <input type="text" name="job_title" id="job_title" value={experience.pivot.job_title} onChange={handleChange} required className="mt-1 input-style" />
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label htmlFor="start_date" className="block text-sm font-medium text-gray-700 dark:text-gray-300">تاریخ شروع</label>
-                      <input type="date" name="start_date" id="start_date" value={experience.pivot.start_date} onChange={handleChange} required className="mt-1 input-style" />
-                    </div>
-                    <div>
-                      <label htmlFor="end_date" className="block text-sm font-medium text-gray-700 dark:text-gray-300">تاریخ پایان (خالی اگر شغل فعلی است)</label>
-                      <input type="date" name="end_date" id="end_date" value={experience.pivot.end_date || ''} onChange={handleChange} className="mt-1 input-style" />
-                    </div>
-                  </div>
-                  <div>
-                    <label htmlFor="employment_type" className="block text-sm font-medium text-gray-700 dark:text-gray-300">نوع همکاری</label>
-                    <select name="employment_type" id="employment_type" value={experience.pivot.employment_type} onChange={handleChange} className="mt-1 input-style">
-                      <option value="تمام وقت">تمام وقت</option>
-                      <option value="پاره وقت">پاره وقت</option>
-                      <option value="قراردادی">قراردادی</option>
-                      <option value="کارآموزی">کارآموزی</option>
-                      <option value="فریلنسری">فریلنسری</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label htmlFor="work_description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">توضیحات شغل</label>
-                    <textarea name="description" id="work_description" value={experience.pivot.description || ''} onChange={handleChange} rows={3} className="mt-1 input-style" />
-                  </div>
-                  <div>
-                    <label htmlFor="companyWebsite" className="block text-sm font-medium text-gray-700 dark:text-gray-300">وبسایت شرکت (اختیاری)</label>
-                    <input type="url" name="website" id="companyWebsite" value={experience.website || ''} onChange={handleChange} className="mt-1 input-style" placeholder="https://example.com" />
-                  </div>
-                  <div className="mt-6 flex justify-end space-x-3 space-x-reverse">
-                    <button type="button" onClick={onClose} className="btn-secondary">انصراف</button>
-                    <button type="submit" className="btn-primary">ذخیره</button>
-                  </div>
-                </form>
-              </Dialog.Panel>
-            </Transition.Child>
-          </div>
-        </div>
-      </Dialog>
-    </Transition>
-  );
-};
-
-// --- مودال برای ویرایش/افزودن دستاورد ---
-interface AchievementModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (achievement: Achievement) => void;
-  initialData?: Achievement | null;
-}
-
-const AchievementModal: React.FC<AchievementModalProps> = ({ isOpen, onClose, onSubmit, initialData }) => {
-  const [achievement, setAchievement] = useState<Achievement>(
-    initialData || { id: Date.now(), title: '', description: '', date: '', issuer: '', created_at: '', updated_at: '', user_id: 0 }
-  );
-
-  useEffect(() => {
-    if (isOpen) {
-      setAchievement(
-        initialData || { id: Date.now(), title: '', description: '', date: '', issuer: '', created_at: '', updated_at: '', user_id: 0 }
-      );
-    }
-  }, [isOpen, initialData]);
-
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setAchievement(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    if (!achievement.title.trim() || !achievement.date.trim()) {
-      alert('لطفاً عنوان دستاورد و تاریخ را وارد کنید.');
-      return;
-    }
-    onSubmit(achievement);
-    onClose();
-  };
-
-  return (
-    <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={onClose} dir="rtl">
-        {/* ... (کد Transition.Child و Dialog.Panel مشابه مودال قبلی با فرم دستاورد) ... */}
-        <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
-          <div className="fixed inset-0 bg-black bg-opacity-60" />
-        </Transition.Child>
-        <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4 text-center">
-            <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0 scale-95" enterTo="opacity-100 scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 scale-100" leaveTo="opacity-0 scale-95">
-              <Dialog.Panel className="w-full max-w-lg transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 p-6 text-right align-middle shadow-xl transition-all">
-                <Dialog.Title as="h3" className="text-xl font-semibold leading-6 text-gray-900 dark:text-white mb-4">
-                  {initialData ? 'ویرایش دستاورد/گواهینامه' : 'افزودن دستاورد/گواهینامه'}
-                </Dialog.Title>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div>
-                    <label htmlFor="ach_title" className="block text-sm font-medium text-gray-700 dark:text-gray-300">عنوان</label>
-                    <input type="text" name="title" id="ach_title" value={achievement.title} onChange={handleChange} required className="mt-1 input-style" />
-                  </div>
-                  <div>
-                    <label htmlFor="ach_description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">توضیحات</label>
-                    <textarea name="description" id="ach_description" value={achievement.description} onChange={handleChange} rows={3} className="mt-1 input-style" />
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label htmlFor="ach_date" className="block text-sm font-medium text-gray-700 dark:text-gray-300">تاریخ</label>
-                      <input type="date" name="date" id="ach_date" value={achievement.date} onChange={handleChange} required className="mt-1 input-style" />
-                    </div>
-                    <div>
-                      <label htmlFor="ach_issuer" className="block text-sm font-medium text-gray-700 dark:text-gray-300">صادر کننده / سازمان</label>
-                      <input type="text" name="issuer" id="ach_issuer" value={achievement.issuer} onChange={handleChange} className="mt-1 input-style" />
-                    </div>
-                  </div>
-                  <div className="mt-6 flex justify-end space-x-3 space-x-reverse">
-                    <button type="button" onClick={onClose} className="btn-secondary">انصراف</button>
-                    <button type="submit" className="btn-primary">ذخیره</button>
-                  </div>
-                </form>
-              </Dialog.Panel>
-            </Transition.Child>
-          </div>
-        </div>
-      </Dialog>
-    </Transition>
-  );
-};
 
 
 const MyProfilePage: NextPage = () => {
 
-  // const [user, setUser] = useState<UserProfileData | null>(null);
   const { user, updateUserInfo } = useUserInfoStore((state) => state)
-  const { mutate, isPending } = useUpdateProfileRequest();
+  const { mutate } = useUpdateProfileRequest();
 
-  // States for edit mode of sections (فقط برای اطلاعات شخصی)
   const [isEditingPersonalInfo, setIsEditingPersonalInfo] = useState(true);
 
-  // States for modals
   const [isWorkExpModalOpen, setIsWorkExpModalOpen] = useState(false);
-  const [editingWorkExp, setEditingWorkExp] = useState<CompanyWorkExperience | null>(null);
+  const [editingWorkExp, setEditingWorkExp] = useState<Company | null>(null);
   const [isAchievementModalOpen, setIsAchievementModalOpen] = useState(false);
   const [editingAchievement, setEditingAchievement] = useState<Achievement | null>(null);
 
@@ -339,9 +83,11 @@ const MyProfilePage: NextPage = () => {
   const { setSkills } = useUserInfoStore();
   const handleAddSkill = async () => {
     if (!user || !newSkill.trim()) return;
-    if (user.skills.find(s => s.name.toLowerCase() === newSkill.trim().toLowerCase())) return;
+    if (user?.skills?.length >= 2)
+    if (user?.skills?.find(s => s.name.toLowerCase() === newSkill.trim().toLowerCase())) return;
 
     await addskillssRequest(newSkill.trim()).then((res) => {
+      console.log(res)
       if (res) {
         setSkills(res);
       }
@@ -358,59 +104,58 @@ const MyProfilePage: NextPage = () => {
 
 
   // --- Work Experience Handlers ---
-  const openWorkExpModal = (exp?: CompanyWorkExperience) => {
+  const openWorkExpModal = (exp: Company | null) => {
     setEditingWorkExp(exp || null);
     setIsWorkExpModalOpen(true);
   };
 
-const handleWorkExpSubmit = async (submittedExp: Company) => {
-  if (!user) return;
-
-  try {
-    // تشخیص بین حالت افزودن و ویرایش بر اساس وجود ID
-    if (submittedExp.id && typeof submittedExp.id === 'number') {
-      // --- حالت ویرایش ---
-      const response = await addWorkHistoryRequest( submittedExp);
-        const updatedCompanies = [...user.companies, response.company];
-      
-      updateUserInfo({ ...user, companies: updatedCompanies });
-      // state را با داده‌های جدیدی که از سرور آمده، به‌روز کن
-    
-
-    } else {
-      // --- حالت افزودن ---
-       if (submittedExp.id && typeof submittedExp.id === 'number') {
-      const response = await updateWorkHistoryRequest(submittedExp.id,submittedExp);
-  const updatedCompanies = user.companies.map(company => 
-        company.id === response.company.id ? response.company : company
-      );
-    
-      updateUserInfo({ ...user, companies: updatedCompanies });
-       }
-      }
-  } catch (error) {
-    // خطاها قبلاً با showSnackbar نمایش داده شده‌اند
-    console.log("عملیات ناموفق بود.");
-  }
-};
-
-/**
- * تابع برای مدیریت حذف سابقه شغلی
- */
-const handleRemoveWorkExperience = async (companyId: number) => {
+  const handleWorkExpSubmit = async (submittedExp: Company) => {
     if (!user) return;
 
     try {
-        await deleteWorkHistoryRequest(companyId);
-        
-        // آیتم حذف شده را از state محلی نیز حذف کن
-        const updatedCompanies = user.companies.filter(company => company.id !== companyId);
-        updateUserInfo({ ...user, companies: updatedCompanies });
+      // تشخیص بین حالت افزودن و ویرایش بر اساس وجود ID
+      if (submittedExp.id && typeof submittedExp.id === 'number') {
+        // --- حالت ویرایش ---
+        const response = await addWorkHistoryRequest(submittedExp);
+        const updatedCompanies = [...user.companies, response.company];
 
-    } catch (error) {
-        console.log("حذف ناموفق بود.");
+        updateUserInfo({ ...user, companies: updatedCompanies });
+        // state را با داده‌های جدیدی که از سرور آمده، به‌روز کن
+
+
+      } else {
+        // --- حالت افزودن ---
+        if (submittedExp.id && typeof submittedExp.id === 'number') {
+          const response = await updateWorkHistoryRequest(submittedExp.id, submittedExp);
+          const updatedCompanies = user.companies.map(company =>
+            company.id === response.company.id ? response.company : company
+          );
+
+          updateUserInfo({ ...user, companies: updatedCompanies });
+        }
+      }
+    }catch (error:unknown) {
+      console.log(error,"حذف ناموفق بود.");
     }
-};
+  };
+
+  /**
+   * تابع برای مدیریت حذف سابقه شغلی
+   */
+  const handleRemoveWorkExperience = async (companyId: number) => {
+    if (!user) return;
+
+    try {
+      await deleteWorkHistoryRequest(companyId);
+
+      // آیتم حذف شده را از state محلی نیز حذف کن
+      const updatedCompanies = user.companies.filter(company => company.id !== companyId);
+      updateUserInfo({ ...user, companies: updatedCompanies });
+
+    } catch (error:unknown) {
+      console.log(error,"حذف ناموفق بود.");
+    }
+  };
 
 
 
@@ -448,15 +193,10 @@ const handleRemoveWorkExperience = async (companyId: number) => {
 
   const handleCancelPersonalInfoEdit = () => {
 
-    //  setIsEditingPersonalInfo(false);
+     setIsEditingPersonalInfo(false);
   };
 
-  const handleSavePersonalInfo = () => {
-    // منطق ذخیره اطلاعات شخصی (مثلا ارسال به API)
-    // if (user) setInitialUser(prev => prev ? { ...prev, ...JSON.parse(JSON.stringify(user)) } : null); // آپدیت initialUser
-    // setIsEditingPersonalInfo(false);
-    // alert('اطلاعات شخصی ذخیره شد.'); // این قسمت را بعدا با نوتیفیکیشن بهتر جایگزین کنید
-  };
+ 
 
   const handleSaveAll = () => {
     console.log("Saving user data:", user);
@@ -550,7 +290,7 @@ const handleRemoveWorkExperience = async (companyId: number) => {
           title="اطلاعات شخصی و درباره من"
           icon={<FaIdBadge size={24} className="text-purple-500" />}
           isEditing={isEditingPersonalInfo}
-          onToggleEdit={() => isEditingPersonalInfo ? handleSavePersonalInfo() : setIsEditingPersonalInfo(true)}
+          onToggleEdit={() => isEditingPersonalInfo ? handleSaveAll() : setIsEditingPersonalInfo(true)}
           isSectionEditable={true} // این بخش دکمه ویرایش/ذخیره/لغو کلی دارد
         >
           {isEditingPersonalInfo ? (
@@ -560,7 +300,7 @@ const handleRemoveWorkExperience = async (companyId: number) => {
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">نام کامل</label>
                 <input type="text" name="name" id="name" value={user.name} onChange={handleInputChange} className={inputStyle} />
               </div>
-       
+
               <div>
                 <label htmlFor="bio" className="block text-sm font-medium text-gray-700 dark:text-gray-300">درباره من (Bio)</label>
                 <textarea name="bio" id="bio" rows={5} value={user.bio || ''} onChange={handleInputChange} className={inputStyle} />
@@ -591,7 +331,7 @@ const handleRemoveWorkExperience = async (companyId: number) => {
               </div>
               <div className="flex justify-end pt-2">
                 <button type="button" onClick={handleCancelPersonalInfoEdit} className={`${btnSecondary} ml-2`}>لغو</button>
-                <button type="button" onClick={handleSavePersonalInfo} className={btnPrimary}>ذخیره اطلاعات شخصی</button>
+                <button type="button" onClick={handleSaveAll} className={btnPrimary}>ذخیره اطلاعات شخصی</button>
               </div>
             </form>
           ) : (
@@ -600,10 +340,9 @@ const handleRemoveWorkExperience = async (companyId: number) => {
         </EditableSection>
 
         {/* Skills Section */}
-        <EditableSection title="مهارت‌ها" icon={<FaLightbulb size={24} className="text-yellow-500" />} onAddNew={() => {/* برای مهارت، افزودن مستقیم است و مودال ندارد */ }}>
+        <EditableSection title="مهارت‌ها" icon={<FaLightbulb size={24} className="text-yellow-500" />} onAddNew={handleAddSkill} >
           <div className="flex items-center mb-4">
             <input type="text" value={newSkill} onChange={(e) => setNewSkill(e.target.value)} placeholder="مهارت جدید (مثلا: JavaScript)" className={`${inputStyle} flex-grow rounded-r-none dark:bg-gray-700`} />
-            <button onClick={handleAddSkill} className={`${btnPrimary} rounded-l-none`}> <FaPlusCircle size={16} className="ml-1 rtl:mr-1" /> افزودن</button>
           </div>
           {user?.skills.length > 0 ? (
             <div className="flex flex-wrap gap-3">
@@ -620,7 +359,7 @@ const handleRemoveWorkExperience = async (companyId: number) => {
         </EditableSection>
 
         {/* Work Experience Section */}
-        <EditableSection title="سوابق شغلی" icon={<FaBriefcase size={24} className="text-green-500" />} onAddNew={() => openWorkExpModal()}>
+        <EditableSection title="سوابق شغلی" icon={<FaBriefcase size={24} className="text-green-500" />} onAddNew={() => openWorkExpModal(null)}>
           {user.companies.length > 0 ? (
             <div className="space-y-6">
               {user.companies.map(exp => (
@@ -691,82 +430,7 @@ const handleRemoveWorkExperience = async (companyId: number) => {
       <WorkExperienceModal isOpen={isWorkExpModalOpen} onClose={() => setIsWorkExpModalOpen(false)} onSubmit={handleWorkExpSubmit} initialData={editingWorkExp} />
       <AchievementModal isOpen={isAchievementModalOpen} onClose={() => setIsAchievementModalOpen(false)} onSubmit={handleAchievementSubmit} initialData={editingAchievement} />
 
-      {/* Global Styles for Modals (can be in globals.css) */}
-      <style jsx global>{`
-        .input-style {
-          margin-top: 0.25rem;
-          display: block;
-          width: 100%;
-          border-radius: 0.375rem; /* rounded-md */
-          border-width: 1px;
-          border-color: #D1D5DB; /* border-gray-300 */
-          box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
-          padding: 0.625rem; /* p-2.5 */
-        }
-        .dark .input-style {
-          border-color: #4B5563; /* dark:border-gray-600 */
-          background-color: #374151; /* dark:bg-gray-700 */
-          color: #F3F4F6; /* dark:text-gray-200 */
-        }
-        .dark .input-style::placeholder {
-            color: #9CA3AF; /* dark:placeholder-gray-500 */
-        }
-        .input-style:focus {
-          outline: 2px solid transparent;
-          outline-offset: 2px;
-          --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
-          --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);
-          box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
-          border-color: #3B82F6; /* focus:border-blue-500 */
-          --tw-ring-color: #3B82F6; /* focus:ring-blue-500 */
-        }
-        .btn-primary {
-          display: inline-flex;
-          justify-content: center;
-          border-radius: 0.5rem; /* rounded-lg */
-          border-width: 1px;
-          border-color: transparent;
-          background-color: #2563EB; /* bg-blue-600 */
-          padding: 0.5rem 1rem; /* px-4 py-2 */
-          font-size: 0.875rem; /* text-sm */
-          font-weight: 500; /* font-medium */
-          color: white;
-          box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06); /* shadow-md */
-          transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-backdrop-filter;
-          transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-          transition-duration: 150ms;
-        }
-        .btn-primary:hover {
-          background-color: #1D4ED8; /* hover:bg-blue-700 */
-        }
-        .btn-secondary {
-          display: inline-flex;
-          justify-content: center;
-          border-radius: 0.5rem; /* rounded-lg */
-          border-width: 1px;
-          border-color: #D1D5DB; /* border-gray-300 */
-          background-color: white;
-          padding: 0.5rem 1rem; /* px-4 py-2 */
-          font-size: 0.875rem; /* text-sm */
-          font-weight: 500; /* font-medium */
-          color: #374151; /* text-gray-700 */
-          box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05); /* shadow-sm */
-          transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-backdrop-filter;
-          transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-          transition-duration: 150ms;
-        }
-        .dark .btn-secondary {
-          border-color: #4B5563; /* dark:border-gray-600 */
-          background-color: #374151; /* dark:bg-gray-700 */
-          color: #F3F4F6; /* dark:text-gray-200 */
-        }
-        .btn-secondary:hover {
-          background-color: #F9FAFB; /* hover:bg-gray-50 */
-        }
-        .dark .btn-secondary:hover {
-          background-color: #4B5563; /* dark:hover:bg-gray-600 */
-        }
-      `}</style>
+    
     </div>
   );
 };

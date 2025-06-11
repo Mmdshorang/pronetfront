@@ -23,7 +23,7 @@ const geistMono = Geist_Mono({
 const vazirFont = "font-vazir";
 
 export const metadata: Metadata = {
-  title: "فروشگاه آدینا رایانه",
+  title: "Pronet",
   description: "مرکز خرید محصولات کامپیوتری استوک",
   generator: "Next.js",
   manifest: "/manifest.json",

@@ -34,10 +34,10 @@ const CompanyCard: React.FC<Props> = ({ company, onClick }) => {
             <path d="M10 15l-5.878 3.09 1.123-6.545L.49 6.91l6.564-.954L10 0l2.946 5.956 6.564.954-4.755 4.635 1.123 6.545z" />
           </svg>
           <span className="ml-1 text-gray-700 font-medium">
-            {company.avg_rating.toFixed(1) ?? "0.0"} از ۵
+            {company.overallAverageRating.toFixed(1) ?? "0.0"} از ۵
           </span>
           <span className="ml-1 text-gray-700 font-medium">
-            {company.ratings_count.toFixed(1) ?? "0.0"} از ۵
+            {company.overallAverageRating.toFixed(1) ?? "0.0"} از ۵
           </span>
         </div>
         <p className="text-sm text-gray-600">شهر: {company.city}</p>

@@ -1,11 +1,10 @@
 "use client";
 import { useEffect, useState } from "react";
-
-import classes from "./Search.module.css"; // کلاس‌های استایل (بسته به پروژه شما)
 import { useSearchRequest } from "@/hooks/user/search";
 import { SearchResult } from "@/types/server/user";
 import Navbar from "@/components/shared/Navbar";
 import Footer from "@/components/shared/Footer";
+import { Search as SearchIcon } from 'lucide-react'; // آیکون برای زیبایی بیشتر
 
 const Search = () => {
   const [query, setQuery] = useState('');
@@ -13,73 +12,93 @@ const Search = () => {
   const { mutate, data, isPending } = useSearchRequest();
 
   const handleSearch = () => {
-    mutate(query); // درخواست جستجو
+    if (query.trim() !== '') {
+      mutate(query);
+    }
   };
 
   // بررسی نتیجه‌ها و بارگذاری مجدد داده‌ها
   useEffect(() => {
     if (data) {
       setResults(data.data);
+      console.log(data);
     }
   }, [data]);
 
   return (
     <>
-      <div className={classes.main}>
+      {/* استفاده از رنگ مورد نظر شما برای پس‌زمینه کل صفحه */}
+      <div className="bg-[rgb(31,41,55)] min-h-screen text-white font-sans">
         <Navbar />
-        <div className={classes.header}>
-          <h1 className={classes.title}>جستجو محصولات</h1>
-        </div>
-        <div className={classes.searchContainer}>
-          <div className={classes.searchBox}>
-            <input 
-              className={classes.searchInput} 
-              placeholder="جستجو ..." 
-              value={query} 
-              onChange={(e) => setQuery(e.target.value)} 
-            />
-            <span className={classes.searchIcon}>🔍</span>
+
+        <main className="max-w-5xl mx-auto px-4 py-12">
+          <div className="text-center mb-12">
+            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-3">
+              جستجوی پیشرفته
+            </h1>
+            <p className="text-lg text-gray-400">
+              کاربران و شرکت‌های مورد نظر خود را به راحتی پیدا کنید.
+            </p>
           </div>
-          <button
-            onClick={handleSearch}
-            className="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700"
-          >
-            جستجو
-          </button>
-        </div>
 
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          {isPending && <div className="text-center">در حال بارگذاری...</div>}
+          {/* بخش جستجوی مدرن */}
+          <div className="flex justify-center items-center gap-2 mb-16">
+            <div className="relative w-full max-w-xl">
+              <input
+                type="text"
+                className="w-full pl-12 pr-4 py-3 text-lg bg-gray-700 border-2 border-transparent rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-400 transition"
+                placeholder="نام کاربر یا شرکت ..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              />
+              <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-6 w-6 text-gray-400" />
+            </div>
+            <button
+              onClick={handleSearch}
+              disabled={isPending}
+              className="bg-blue-600 text-white px-8 py-3 font-semibold rounded-xl hover:bg-blue-700 transition duration-300 disabled:bg-gray-500 disabled:cursor-not-allowed"
+            >
+              {isPending ? '...' : 'جستجو'}
+            </button>
+          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {results.map((item) => (
-              <div key={`${item.type}-${item.id}`} className="border rounded-2xl shadow-md p-4 bg-white">
-                <div className="flex items-center gap-3">
-                  <img
-                    src={item.photo || '/default-avatar.png'}
-                    alt={item.name}
-                    className="w-12 h-12 rounded-full object-cover"
-                  />
-                  <div>
-                    <h3 className="text-lg font-semibold">{item.name}</h3>
-                    <p className="text-sm text-gray-600">{item.email}</p>
-                    <span className={`text-xs mt-1 inline-block px-2 py-1 rounded ${
-                      item.type === 'user' ? 'bg-green-100 text-green-700' : 'bg-purple-100 text-purple-700'
+          {/* نمایش نتایج */}
+          <div>
+            {isPending && <div className="text-center text-gray-300 text-xl">در حال بارگذاری نتایج...</div>}
+
+            {!isPending && results.length > 0 && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {results.map((item) => (
+                  <div 
+                    key={`${item.type}-${item.id}`} 
+                    className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-2xl shadow-lg p-5 flex flex-col items-center text-center transition-transform hover:-translate-y-2"
+                  >
+                    <img
+                      src={`http://localhost:8000/storage/${item.photo}` || '/default-avatar.png'}
+                      alt={item.name}
+                      className="w-24 h-24 rounded-full object-cover mb-4 border-4 border-gray-600"
+                    />
+                    <h3 className="text-xl font-bold text-white">{item.name}</h3>
+                    <p className="text-sm text-gray-400 mb-4">{item.email}</p>
+                    <span className={`text-xs font-bold px-4 py-1 rounded-full ${
+                      item.type === 'user' ? 'bg-blue-500/20 text-blue-300' : 'bg-purple-500/20 text-purple-300'
                     }`}>
                       {item.type === 'user' ? 'کاربر' : 'شرکت'}
                     </span>
                   </div>
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
+            )}
 
-          {!isPending && results.length === 0 && query.trim() !== '' && (
-            <p className="text-center text-gray-500 mt-6">نتیجه‌ای یافت نشد.</p>
-          )}
-        </div>
+            {!isPending && results.length === 0 && query.trim() !== '' && (
+              <p className="text-center text-gray-500 text-xl mt-8">نتیجه‌ای برای جستجوی شما یافت نشد.</p>
+            )}
+          </div>
+        </main>
+
+        <Footer />
       </div>
-      <Footer />
     </>
   );
 };
