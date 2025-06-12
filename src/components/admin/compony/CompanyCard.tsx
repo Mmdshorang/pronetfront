@@ -8,7 +8,7 @@ interface CompanyCardProps {
 const CompanyCard: React.FC<CompanyCardProps> = ({ company }) => {
   const { name, pivot, id } = company;
   const { job_title, start_date, end_date, role } = pivot;
-
+console.log(role)
   return (
     <div className="bg-white shadow-md rounded-lg p-6 hover:shadow-xl transition-shadow duration-300">
       <div className="flex flex-col h-full">
@@ -26,7 +26,7 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company }) => {
         {/* دکمه ویرایش فقط برای ادمین */}
         {role === 'admin' && (
           <div className="mt-4">
-            <Link href={`/companies/${id}/edit`} legacyBehavior>
+            <Link href={`/mycompany/${id}`} legacyBehavior>
               <a className="w-full text-center bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-300">
                 مدیریت شرکت
               </a>

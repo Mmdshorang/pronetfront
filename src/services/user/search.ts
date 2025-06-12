@@ -1,4 +1,4 @@
-import { getApiUrl } from "@/common/apiUrls";
+
 import { showSnackbar } from "@/stores/snackbarStore";
 import { StatusCodes } from "@/types/model/generic";
 import axios from "axios";

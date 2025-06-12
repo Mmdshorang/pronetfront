@@ -2,7 +2,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import useSnackbarStore from "@/stores/snackbarStore";
-import { UserListResponse, UserProfileData, UserProfileDataResponse } from "@/types/model/type";
+import { UserListResponse, UserProfileDataResponse } from "@/types/model/type";
 import { getUserByIdRequest, getUsersRequest } from "@/services/user/getusers";
 import useUserStore from "@/stores/employStore";
 export const useEmployRequest = () => {

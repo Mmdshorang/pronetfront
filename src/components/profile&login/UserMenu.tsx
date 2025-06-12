@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ShoppingBag, Settings, ChevronDown } from 'lucide-react';
+import {  Settings, ChevronDown } from 'lucide-react';
 import Link from 'next/link';
 
 import LogoutButton from '../shared/LogoutButton';
@@ -28,6 +28,15 @@ const UserMenu = () => {
               >
                 <Settings className="w-5 h-5" />
                 اطلاعات کاربری
+              </Link>
+            </li>
+               <li>
+              <Link
+                href="/mycompany"
+                className="flex items-center gap-2 p-3 hover:bg-gray-100"
+              >
+                <Settings className="w-5 h-5" />
+               مدیریت  شرکت های من 
               </Link>
             </li>
             <li>

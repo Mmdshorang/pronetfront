@@ -5,17 +5,27 @@ import { SearchResult } from "@/types/server/user";
 import Navbar from "@/components/shared/Navbar";
 import Footer from "@/components/shared/Footer";
 import { Search as SearchIcon } from 'lucide-react'; // آیکون برای زیبایی بیشتر
+import { useRouter } from "next/navigation";
 
 const Search = () => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const { mutate, data, isPending } = useSearchRequest();
-
+  const router = useRouter();
   const handleSearch = () => {
     if (query.trim() !== '') {
       mutate(query);
     }
   };
+  const handleClick = (item: SearchResult) => {
+    if (item.type === 'company') {
+      router.push(`companies/${item.id}`)
+    } else {
+      router.push(`prof/${item.id}`)
+
+    }
+
+  }
 
   // بررسی نتیجه‌ها و بارگذاری مجدد داده‌ها
   useEffect(() => {
@@ -70,9 +80,10 @@ const Search = () => {
             {!isPending && results.length > 0 && (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {results.map((item) => (
-                  <div 
-                    key={`${item.type}-${item.id}`} 
+                  <div
+                    key={`${item.type}-${item.id}`}
                     className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-2xl shadow-lg p-5 flex flex-col items-center text-center transition-transform hover:-translate-y-2"
+                    onClick={() => handleClick(item)}
                   >
                     <img
                       src={`http://localhost:8000/storage/${item.photo}` || '/default-avatar.png'}
@@ -81,9 +92,8 @@ const Search = () => {
                     />
                     <h3 className="text-xl font-bold text-white">{item.name}</h3>
                     <p className="text-sm text-gray-400 mb-4">{item.email}</p>
-                    <span className={`text-xs font-bold px-4 py-1 rounded-full ${
-                      item.type === 'user' ? 'bg-blue-500/20 text-blue-300' : 'bg-purple-500/20 text-purple-300'
-                    }`}>
+                    <span className={`text-xs font-bold px-4 py-1 rounded-full ${item.type === 'user' ? 'bg-blue-500/20 text-blue-300' : 'bg-purple-500/20 text-purple-300'
+                      }`}>
                       {item.type === 'user' ? 'کاربر' : 'شرکت'}
                     </span>
                   </div>

@@ -6,9 +6,10 @@ import type { NextPage } from 'next';
 import Head from 'next/head';
 import { useState, ChangeEvent, Fragment } from 'react';
 import {
-   FaSave, FaTimesCircle, FaTrashAlt,
+  FaSave, FaTimesCircle, FaTrashAlt,
   FaMapMarkerAlt, FaLinkedin, FaGithub, FaEnvelope, FaPhone, FaBriefcase,
-  FaLightbulb, FaStar, FaCalendarAlt, FaBuilding, FaIdBadge, FaEdit
+  FaLightbulb, FaStar, FaCalendarAlt, FaBuilding, FaIdBadge, FaEdit,
+  FaHome
 } from 'react-icons/fa';
 import { FiUploadCloud } from 'react-icons/fi';
 import './style.css'
@@ -20,6 +21,8 @@ import { StatusCodes } from '@/types/model/generic';
 import EditableSection from '@/hooks/user/EditableSection';
 import WorkExperienceModal from '@/hooks/user/WorkExperienceModal';
 import AchievementModal from '@/hooks/user/AchievementModal';
+import { useRouter } from 'next/navigation';
+
 
 
 
@@ -36,7 +39,7 @@ const MyProfilePage: NextPage = () => {
   const [editingAchievement, setEditingAchievement] = useState<Achievement | null>(null);
 
   const [newSkill, setNewSkill] = useState('');
-
+ const router =useRouter()
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     if (!user) return;
@@ -84,7 +87,7 @@ const MyProfilePage: NextPage = () => {
   const handleAddSkill = async () => {
     if (!user || !newSkill.trim()) return;
     if (user?.skills?.length >= 2)
-    if (user?.skills?.find(s => s.name.toLowerCase() === newSkill.trim().toLowerCase())) return;
+      if (user?.skills?.find(s => s.name.toLowerCase() === newSkill.trim().toLowerCase())) return;
 
     await addskillssRequest(newSkill.trim()).then((res) => {
       console.log(res)
@@ -134,8 +137,8 @@ const MyProfilePage: NextPage = () => {
           updateUserInfo({ ...user, companies: updatedCompanies });
         }
       }
-    }catch (error:unknown) {
-      console.log(error,"حذف ناموفق بود.");
+    } catch (error: unknown) {
+      console.log(error, "حذف ناموفق بود.");
     }
   };
 
@@ -152,8 +155,8 @@ const MyProfilePage: NextPage = () => {
       const updatedCompanies = user.companies.filter(company => company.id !== companyId);
       updateUserInfo({ ...user, companies: updatedCompanies });
 
-    } catch (error:unknown) {
-      console.log(error,"حذف ناموفق بود.");
+    } catch (error: unknown) {
+      console.log(error, "حذف ناموفق بود.");
     }
   };
 
@@ -193,10 +196,10 @@ const MyProfilePage: NextPage = () => {
 
   const handleCancelPersonalInfoEdit = () => {
 
-     setIsEditingPersonalInfo(false);
+    setIsEditingPersonalInfo(false);
   };
 
- 
+
 
   const handleSaveAll = () => {
     console.log("Saving user data:", user);
@@ -233,7 +236,36 @@ const MyProfilePage: NextPage = () => {
         <title>پروفایل من - {user.name}</title>
         <meta name="description" content={`پروفایل کاربری ${user.name} در سامانه شبکه‌سازی و ارزیابی حرفه‌ای.`} />
       </Head>
+      {/* Breadcrumb Navigation - Enhanced Style */}
+      <nav aria-label="Breadcrumb" className="mb-8">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4">
+        <ol className="flex items-center space-x-3 space-x-reverse text-base font-semibold">
+          
+          {/* Home Button */}
+          <li>
+            <button
+              onClick={() => router.push('/')}
+              className="flex items-center text-blue-600 dark:text-blue-400 hover:underline focus:outline-none"
+            >
+              <FaHome size={20} className="ml-2 rtl:mr-2 rtl:ml-0" />
+              <span>خانه</span>
+            </button>
+          </li>
 
+          {/* Separator and Current Page */}
+          <li>
+            <div className="flex items-center">
+              <svg className="h-6 w-6 flex-shrink-0 text-gray-400 dark:text-gray-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z" />
+              </svg>
+              <span className="mr-3 rtl:ml-3 rtl:mr-0 text-gray-800 dark:text-gray-200">
+                پروفایل من
+              </span>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </nav>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl">
         {/* Profile Header (همانند قبل با تغییر جزئی در دکمه ذخیره کلی) */}
         <div className="bg-white dark:bg-gray-800 shadow-xl rounded-xl p-6 md:p-8 mb-8 flex flex-col sm:flex-row items-center space-y-6 sm:space-y-0 sm:space-x-8 sm:space-x-reverse">
@@ -430,7 +462,7 @@ const MyProfilePage: NextPage = () => {
       <WorkExperienceModal isOpen={isWorkExpModalOpen} onClose={() => setIsWorkExpModalOpen(false)} onSubmit={handleWorkExpSubmit} initialData={editingWorkExp} />
       <AchievementModal isOpen={isAchievementModalOpen} onClose={() => setIsAchievementModalOpen(false)} onSubmit={handleAchievementSubmit} initialData={editingAchievement} />
 
-    
+
     </div>
   );
 };

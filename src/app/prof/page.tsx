@@ -2,7 +2,7 @@
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import { useEffect, useState } from 'react';
-import { FaStar, FaBuilding, FaUserTie, FaPlusCircle } from 'react-icons/fa';
+import { FaStar, FaBuilding, FaUserTie, FaPlusCircle, FaUserCircle, FaHome, FaSearch } from 'react-icons/fa';
 import Link from 'next/link';
 import { RatingDialog } from '@/components/admin/rating/RatingDialog';
 import { Profile, RATING_CRITERIA_DEFINITIONS, RatingCriterionValue, RatingSubmission } from '@/types/model/type'; // فرض بر اینکه همه تایپ‌ها در این فایل هستند
@@ -11,6 +11,7 @@ import { useCompanyGetRequest } from '@/hooks/company/getCompany';
 import useUserStore from '@/stores/employStore';
 import { calculateOverallAverage } from '@/util/calculateOverallAverage';
 import { addRatingRequest } from '@/services/user/rating';
+import { useRouter } from 'next/navigation';
 
 // ✅ کامپوننت کارت پروفایل یکپارچه شده
 const ProfileCard: React.FC<{ profile: Profile; handleOpenRatingDialog: (profile: Profile) => void }> = ({ profile, handleOpenRatingDialog }) => (
@@ -89,6 +90,7 @@ const ProfilesPage: NextPage = () => {
     setIsRatingDialogOpen(false);
     setSelectedProfile(null);
   };
+  const router=useRouter()
 
   const handleRateSubmit = (criteriaValues: RatingCriterionValue[], comment?: string) => {
     if (!selectedProfile) return;
@@ -101,36 +103,36 @@ const ProfilesPage: NextPage = () => {
       timestamp: new Date(),
       averageScore: parseFloat((criteriaValues.reduce((sum, cv) => sum + cv.score, 0) / criteriaValues.length).toFixed(1)),
     };
-    
+
     // ✅ منطق آپدیت کردن امتیاز حالا کاملا درست کار می‌کند
     if (selectedProfile.type === 'company') {
-        addRatingRequest({ rateable_type: 'company', rateable_id: Number(selectedProfile.id), criteriaValues: newSubmission.criteriaValues, comment: newSubmission.comment });
-        const updatedCompanyList = companies.map(c => {
-            if (c.id === Number(selectedProfile.id)) {
-                const updatedRatings = [...c.ratings, newSubmission];
-                return {
-                    ...c,
-                    ratings: updatedRatings,
-                    overallAverageRating: calculateOverallAverage(updatedRatings),
-                };
-            }
-            return c;
-        });
-        setCompanyList(updatedCompanyList);
+      addRatingRequest({ rateable_type: 'company', rateable_id: Number(selectedProfile.id), criteriaValues: newSubmission.criteriaValues, comment: newSubmission.comment });
+      const updatedCompanyList = companies.map(c => {
+        if (c.id === Number(selectedProfile.id)) {
+          const updatedRatings = [...c.ratings, newSubmission];
+          return {
+            ...c,
+            ratings: updatedRatings,
+            overallAverageRating: calculateOverallAverage(updatedRatings),
+          };
+        }
+        return c;
+      });
+      setCompanyList(updatedCompanyList);
     } else { // type is 'employee'
-        addRatingRequest({ rateable_type: 'user', rateable_id: Number(selectedProfile.id), criteriaValues: newSubmission.criteriaValues, comment: newSubmission.comment });
-        const updatedEmployeeList = employees.map(p => {
-            if (p.id === selectedProfile.id) {
-                const updatedRatings = [...p.ratings, newSubmission];
-                return { 
-                    ...p, 
-                    ratings: updatedRatings, 
-                    overallAverageRating: calculateOverallAverage(updatedRatings) 
-                };
-            }
-            return p;
-        });
-        setProfiles(updatedEmployeeList);
+      addRatingRequest({ rateable_type: 'user', rateable_id: Number(selectedProfile.id), criteriaValues: newSubmission.criteriaValues, comment: newSubmission.comment });
+      const updatedEmployeeList = employees.map(p => {
+        if (p.id === selectedProfile.id) {
+          const updatedRatings = [...p.ratings, newSubmission];
+          return {
+            ...p,
+            ratings: updatedRatings,
+            overallAverageRating: calculateOverallAverage(updatedRatings)
+          };
+        }
+        return p;
+      });
+      setProfiles(updatedEmployeeList);
     }
 
     handleCloseRatingDialog();
@@ -144,33 +146,63 @@ const ProfilesPage: NextPage = () => {
       </Head>
 
       <header className="bg-white dark:bg-gray-800 shadow-md sticky top-0 z-40">
-        <div className="container mx-auto px-4 sm:px-6 py-4">
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
-            لیست شرکت‌ها و کارمندان
-          </h1>
-          <div className="mt-4">
-            <nav className="flex space-x-2 sm:space-x-4 space-x-reverse border-b border-gray-200 dark:border-gray-700">
-              <button
-                onClick={() => setActiveTab('companies')}
-                className={`py-2 px-3 sm:px-4 font-medium text-sm whitespace-nowrap ${
-                  activeTab === 'companies'
-                    ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400'
-                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
-                }`}
-              >
-                <FaBuilding className="inline ml-1 rtl:mr-1 rtl:ml-0" /> شرکت‌ها
-              </button>
-              <button
-                onClick={() => setActiveTab('employees')}
-                className={`py-2 px-3 sm:px-4 font-medium text-sm whitespace-nowrap ${
-                  activeTab === 'employees'
-                    ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400'
-                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
-                }`}
-              >
-                <FaUserTie className="inline ml-1 rtl:mr-1 rtl:ml-0" /> کارمندان
-              </button>
-            </nav>
+        <div className="container mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
+          {/* عنوان و تب‌ها */}
+          <div className="flex flex-col">
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-white flex items-center">
+              لیست شرکت‌ها و کارمندان
+            </h1>
+            <div className="mt-4">
+              <nav className="flex space-x-2 sm:space-x-4 space-x-reverse border-b border-gray-200 dark:border-gray-700">
+                <button
+                  onClick={() => setActiveTab('companies')}
+                  className={`py-2 px-3 sm:px-4 font-medium text-sm whitespace-nowrap ${activeTab === 'companies'
+                      ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400'
+                      : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                    }`}
+                >
+                  <FaBuilding className="inline ml-1 rtl:mr-1 rtl:ml-0" /> شرکت‌ها
+                </button>
+                <button
+                  onClick={() => setActiveTab('employees')}
+                  className={`py-2 px-3 sm:px-4 font-medium text-sm whitespace-nowrap ${activeTab === 'employees'
+                      ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400'
+                      : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                    }`}
+                >
+                  <FaUserTie className="inline ml-1 rtl:mr-1 rtl:ml-0" /> کارمندان
+                </button>
+              </nav>
+            </div>
+          </div>
+
+          {/* آیکن منو یا پروفایل سمت چپ */}
+          <div className="flex items-center space-x-4 space-x-reverse">
+            {/* آیکن منو */}
+               <button
+              className="text-gray-600 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400"
+              aria-label="جستجو"
+              onClick={()=>router.push('/search')}
+            >
+              <FaSearch size={24} />
+            </button>
+            <button
+              className="text-gray-600 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400"
+              aria-label="خانه "
+               onClick={()=>router.push('/')}
+            >
+              <FaHome size={20} />
+            </button>
+
+
+            {/* آیکن پروفایل */}
+            <button
+              className="text-gray-600 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400"
+              aria-label="پروفایل"
+              onClick={()=>router.push('/prof/myprofile')}
+            >
+              <FaUserCircle size={24} />
+            </button>
           </div>
         </div>
       </header>
@@ -179,23 +211,23 @@ const ProfilesPage: NextPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {activeTab === 'companies'
             ? companies.map(company => {
-                // ✅ تبدیل داده شرکت به پروفایل استاندارد قبل از ارسال به کامپوننت کارت
-                const profile: Profile = {
-                  id: company.id.toString(),
-                  name: company.name,
-                  type: 'company',
-                  avatarUrl: company.logo,
-                  description: company.industry,
-                  ratings: company.ratings,
-                  overallAverageRating: company.overallAverageRating,
-                };
-                return <ProfileCard key={company.id} profile={profile} handleOpenRatingDialog={handleOpenRatingDialog} />;
-              })
+              // ✅ تبدیل داده شرکت به پروفایل استاندارد قبل از ارسال به کامپوننت کارت
+              const profile: Profile = {
+                id: company.id.toString(),
+                name: company.name,
+                type: 'company',
+                avatarUrl: company.logo,
+                description: company.industry,
+                ratings: company.ratings,
+                overallAverageRating: company.overallAverageRating,
+              };
+              return <ProfileCard key={company.id} profile={profile} handleOpenRatingDialog={handleOpenRatingDialog} />;
+            })
             : employees.map(profile => (
-                <ProfileCard key={profile.id} profile={profile} handleOpenRatingDialog={handleOpenRatingDialog} />
-              ))}
+              <ProfileCard key={profile.id} profile={profile} handleOpenRatingDialog={handleOpenRatingDialog} />
+            ))}
         </div>
-        
+
         {/* Loding And Empty State ... */}
 
       </main>

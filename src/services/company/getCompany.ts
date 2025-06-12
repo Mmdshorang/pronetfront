@@ -28,7 +28,7 @@ console.log(result)
       } else {
         showSnackbar(result?.message, "error");
       }
-  
+   console.log(result)
       return result;
     } catch (error) {
       console.error("Error fetching company:", error);

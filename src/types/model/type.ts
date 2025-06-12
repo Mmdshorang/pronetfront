@@ -66,9 +66,11 @@ export interface WorkExperience {
   name: string;
   website: string;
   description: string;
+  
   pivot: {
     job_title: string;
     start_date: string;
+    role:string;
     end_date: string | null;
     description: string;
     employment_type: string;

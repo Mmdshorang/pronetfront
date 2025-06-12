@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { forwardRef, HTMLAttributes, ImgHTMLAttributes } from "react";
-import Image, { StaticImageData } from "next/image";
+
 
 export const Avatar = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
@@ -13,11 +13,7 @@ export const Avatar = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>
 );
 Avatar.displayName = "Avatar";
 
-type AvatarImageProps = {
-  src: string | StaticImageData;
-  alt?: string;
-  className?: string;
-} & Omit<ImgHTMLAttributes<HTMLImageElement>, "src" | "alt">;
+
 
 export const AvatarImage = forwardRef<HTMLImageElement, ImgHTMLAttributes<HTMLImageElement>>(
   ({ className, alt = "", ...props }, ref) => (

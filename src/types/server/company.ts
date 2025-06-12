@@ -4,10 +4,6 @@ import { RatingSubmission } from "../model/type";
 import { Company, User } from "./user";
 
 
-//add company input
-
-
-//end
 export interface CompanyAdd {
     id?: number;
     name: string;
@@ -154,4 +150,93 @@ export interface CompanyUserPivot {
   role: 'admin' | 'member';
   created_at: string; // ISO timestamp
   updated_at: string; // ISO timestamp
+}
+
+
+
+//update company
+export interface CompanyUpdateInput {
+  name?: string;
+  city?: string;
+  country?: string;
+  logo?: string; 
+  description?: string;
+  industry?: string;
+  website?: string;
+  phone?: string;
+}
+export interface CompanyUpdateResponse {
+  status: 'success' | 'error';
+  message: string;
+  company?: {
+    id: number;
+    name: string;
+    logo: string | null;
+    description: string | null;
+    industry: string | null;
+    website: string | null;
+    phone: string | null;
+    location_id: number;
+    location: {
+      id: number;
+      city: string;
+      country: string;
+      created_at: string;
+      updated_at: string;
+    };
+    created_at: string;
+    updated_at: string;
+  };
+  error?: string; // فقط در صورت بروز خطا
+}
+export interface CompanyAddUserInput {
+  user_id: number;
+  job_title: string;
+  start_date: string; // تاریخ به فرمت ISO یا "YYYY-MM-DD"
+  end_date?: string | null;
+  description?: string | null;
+  employment_type: 'تمام وقت' | 'پاره وقت' | 'قراردادی' | 'کارآموزی' | 'فریلنسری';
+  role: 'admin' | 'member';
+}
+
+export interface CompanyAddUserResponse {
+  message: string;
+  user: {
+    id: number;
+    name: string;
+    email: string;
+    role: string; // نقش کلی کاربر در سیستم
+    bio: string | null;
+    phone: string | null;
+    linkedin_url: string | null;
+    github_url: string | null;
+    location_id: number | null;
+    profile_photo: string | null;
+    location?: {
+      id: number;
+      name: string;
+      // اگر بخواهی روابط location را هم لود کنی، می‌تونم گسترش بدم
+    };
+    pivot: {
+      company_id: number;
+      user_id: number;
+      job_title: string;
+      start_date: string; // ISO date format
+      end_date: string | null;
+      description: string | null;
+      employment_type: 'تمام وقت' | 'پاره وقت' | 'قراردادی' | 'کارآموزی' | 'فریلنسری';
+      role: 'admin' | 'member';
+      created_at: string;
+      updated_at: string;
+    };
+    created_at: string;
+    updated_at: string;
+  };
+}
+
+
+//remove user in company 
+
+export interface CompanyRemoveUserSuccessResponse {
+  message: string; // "کاربر با موفقیت از شرکت حذف شد."
 }
