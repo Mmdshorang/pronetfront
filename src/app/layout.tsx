@@ -1,36 +1,38 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import type { Metadata } from 'next';
+import { Geist, Geist_Mono } from 'next/font/google';
+import './globals.css';
 import '@fontsource/vazir';
-import Script from "next/script";
+import Script from 'next/script';
 
-import AxiosProvider from "./providers/AxiosProvider";
-import ReactQueryProvider from "./providers/ReactQueryProvider";
-import Snackbar from "@/components/shared/Snackbar";
-import InitialDataLoader from "@/components/InitialDataLoader";
-import { ConfirmProvider } from "@/components/shared/ConfirmContext";
+// [مهم] ThemeProvider را از فایلی که می‌سازیم وارد کنید
+import { ThemeProvider } from './providers'; 
+import AxiosProvider from './providers/AxiosProvider';
+import ReactQueryProvider from './providers/ReactQueryProvider';
+import Snackbar from '@/components/shared/Snackbar';
+import InitialDataLoader from '@/components/InitialDataLoader';
+import { ConfirmProvider } from '@/components/shared/ConfirmContext';
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  variable: '--font-geist-mono',
+  subsets: ['latin'],
 });
 
-const vazirFont = "font-vazir";
+const vazirFont = 'font-vazir';
 
 export const metadata: Metadata = {
-  title: "Pronet",
-  description: "مرکز خرید محصولات کامپیوتری استوک",
-  generator: "Next.js",
-  manifest: "/manifest.json",
-  keywords: ["nextjs", "next14", "pwa", "next-pwa"],
+  title: 'Pronet',
+  description: 'مرکز خرید محصولات کامپیوتری استوک',
+  generator: 'Next.js',
+  manifest: '/manifest.json',
+  keywords: ['nextjs', 'next14', 'pwa', 'next-pwa'],
   icons: {
-    icon: '/favicon.ico'
-  }
+    icon: '/favicon.ico',
+  },
 };
 
 export default function RootLayout({
@@ -39,7 +41,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fa" dir="rtl">
+    // [مهم] این پراپرتی برای جلوگیری از خطای hydration در next-themes ضروری است
+    <html lang="fa" dir="rtl" suppressHydrationWarning>
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="manifest" href="/manifest.json" />
@@ -48,15 +51,23 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${vazirFont} antialiased`}
       >
-        <ReactQueryProvider>
-          <AxiosProvider>
-          <ConfirmProvider>
-            {children}
-            <InitialDataLoader />
-            </ConfirmProvider>
-            <Snackbar />
-          </AxiosProvider>
-        </ReactQueryProvider>
+        {/* ThemeProvider باید تمام Provider های دیگر را در بر بگیرد */}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <ReactQueryProvider>
+            <AxiosProvider>
+              <ConfirmProvider>
+                {children}
+                <InitialDataLoader />
+              </ConfirmProvider>
+              <Snackbar />
+            </AxiosProvider>
+          </ReactQueryProvider>
+        </ThemeProvider>
 
         {/* Goftino Script */}
         <Script
@@ -76,7 +87,7 @@ export default function RootLayout({
                 }
                 "complete"===d.readyState?g():a.attachEvent?a.attachEvent("onload",g):a.addEventListener("load",g,!1);
               }();
-            `
+            `,
           }}
         />
       </body>

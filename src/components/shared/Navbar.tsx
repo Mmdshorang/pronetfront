@@ -7,6 +7,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useUserInfoStore } from "@/stores/userStore";
 import DrawerNavigation from "../drawer/DrawerNavigation";
+import { ThemeToggleButton } from "./ThemeToggleButton";
 const items = [
 
   {
@@ -92,6 +93,7 @@ const Navbar: React.FC = () => {
                 </Link>
               </li>
             </ul>
+            <ThemeToggleButton />
             <div className="flex items-center gap-4">
               <Link href={"/search"}>
                 <button className="relative bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full flex items-center gap-2">

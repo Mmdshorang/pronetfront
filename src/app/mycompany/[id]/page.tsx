@@ -2,12 +2,13 @@
 
 // ------------------- ایمپورت‌های مورد نیاز -------------------
 import Head from 'next/head';
-import { use, useEffect, useState } from 'react';
+import { use, useEffect, useRef, useState } from 'react';
 import {
     FaBuilding, FaUserCircle, FaIndustry, FaEdit, FaPlus, FaTrash, FaTimes,
-    FaGlobe, FaPhone, FaMapMarkerAlt, FaCommentDots, FaUser, FaCalendarAlt
+    FaGlobe, FaPhone, FaMapMarkerAlt, FaCommentDots, FaUser, FaCalendarAlt,
+    FaCamera
 } from 'react-icons/fa';
-import { useQueryClient } from '@tanstack/react-query'; // برای آپدیت آنی UI
+import { useMutation, useQueryClient } from '@tanstack/react-query'; // برای آپدیت آنی UI
 
 // --- هوک‌ها ---
 import { useCompanyGetByIDRequest } from '@/hooks/company/getCompany';
@@ -26,6 +27,8 @@ import EmployeeCard from '@/components/admin/compony/EmployeeCard';
 // این تایپ‌ها را بر اساس ساختار واقعی پاسخ API خودتان تنظیم کنید
 
 import { CompanyAddUserInput, CompanyUpdateInput, CompanyUpdateResponse, CompanyAddUserResponse, CompanyRating, CompanyShowResponse, CompanyEmployeesResponse, CompanyEmployee } from '@/types/server/company';
+import EmployeeSearchInput from '@/components/dialogs/EmployeeSearchInput';
+import { addLogoRequest } from '@/services/company/addlogoCompany';
 
 
 // ------------------- کامپوننت کارت امتیاز (تعریف شده در همین فایل) -------------------
@@ -110,12 +113,12 @@ const CompanyDetailPage = ({ params }: CompanyDetailPageProps) => {
     const { data: companyData, isPending: isCompanyLoading, mutate: refetchCompany } = useCompanyGetByIDRequest();
     const { data: dataEmployees, isPending: isEmployeesLoading, mutate: refetchEmployees } = useCompanyEmployeesGetByIDRequest();
 
-    // --- هوک‌های ویرایش، افزودن و حذف ---
     const { mutate: updateCompany, isPending: isUpdatingCompany } = useUpdateCompanyRequest();
     const { mutate: addEmployee, isPending: isAddingEmployee } = useAddCompanyEmployeesRequest();
     const { mutate: deleteEmployee } = useDeleteCompanyEmployeesRequest();
+    const [employeeName, setEmployeeName] = useState('');
 
-    // --- State ها ---
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isAddEmployeeModalOpen, setIsAddEmployeeModalOpen] = useState(false);
     const [companyFormData, setCompanyFormData] = useState<CompanyUpdateInput>({});
@@ -126,6 +129,34 @@ const CompanyDetailPage = ({ params }: CompanyDetailPageProps) => {
         employment_type: 'تمام وقت',
         role: 'member',
     });
+    const { mutate: uploadLogo, isPending: isUploading } = useMutation({
+        mutationFn: addLogoRequest,
+        onSuccess: (data) => {
+            // پس از موفقیت، URL جدید لوگو را در state و کش React Query به‌روزرسانی می‌کنیم
+            const newLogoUrl = data.profile_photo_url;
+            setCompanyFormData(prev => ({ ...prev, logo: newLogoUrl }));
+
+            // به‌روزرسانی کش مربوط به اطلاعات شرکت
+            queryClient.invalidateQueries({ queryKey: ['company', company?.id] });
+        },
+        onError: (error) => {
+            console.error("Logo upload failed:", error);
+            // نمایش خطا به کاربر (تابع showSnackbar شما)
+        }
+    });
+
+    // این تابع با انتخاب فایل توسط کاربر، فرآیند آپلود را شروع می‌کند
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            uploadLogo(file);
+        }
+    };
+
+    // این تابع با کلیک روی دکمه، input مخفی را فعال می‌کند
+    const handleUploadClick = () => {
+        fileInputRef.current?.click();
+    };
 
     useEffect(() => {
         if (id) {
@@ -161,12 +192,21 @@ const CompanyDetailPage = ({ params }: CompanyDetailPageProps) => {
         // 'prev' در اینجا به درستی از نوع CompanyUpdateInput است
         setCompanyFormData(prev => ({ ...prev, [name]: value }));
     };
-
+    const handleEmployeeSelect = (employee: { id: number; name: string; photo?: string | null }) => {
+        // شناسه کارمند را در state فرم ذخیره کن
+        setNewEmployeeFormData(prevData => ({
+            ...prevData,
+            user_id: employee.id,
+        }));
+        // نام کارمند را برای نمایش در اینپوت جستجو ذخیره کن
+        setEmployeeName(employee.name);
+    };
     // مدیریت تغییرات در فرم افزودن کارمند
     const handleEmployeeFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         // 'prev' در اینجا به درستی از نوع CompanyAddUserInput است
         setNewEmployeeFormData(prev => ({ ...prev, [name]: name === 'user_id' ? Number(value) : value }));
+
     };
     const handleUpdateCompanySubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -264,12 +304,54 @@ const CompanyDetailPage = ({ params }: CompanyDetailPageProps) => {
             <header className="bg-gradient-to-r from-blue-600 to-indigo-700 dark:from-blue-700 dark:to-indigo-800 text-white shadow-lg">
                 <div className="container mx-auto px-6 py-10">
                     <div className="flex flex-col md:flex-row items-center">
-                        <FaBuilding size={120} className="rounded-full bg-white p-4 text-indigo-600 shadow-md mb-6 md:mb-0 md:ml-8 rtl:md:mr-8 rtl:md:ml-0" />
+                        {/* بخش نمایش و آپلود لوگو */}
+                        <div className="relative mb-6 md:mb-0 md:mr-8 rtl:md:ml-8 rtl:md:mr-0 group">
+
+                            {/* ورودی فایل که از دید کاربر پنهان است */}
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                onChange={handleFileChange}
+                                className="hidden"
+                                accept="image/png, image/jpeg, image/gif"
+                            />
+
+                            {/* نمایش لوگوی فعلی یا آیکون پیش‌فرض */}
+                            {company.logo ? (
+                                <img
+                                    src={`http://localhost:8000/storage/${company.logo}`}
+                                    alt={company.name}
+                                    className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-md"
+                                />
+                            ) : (
+                                <div className="w-32 h-32 rounded-full bg-white flex items-center justify-center shadow-md">
+                                    <FaBuilding size={80} className="text-indigo-600" />
+                                </div>
+                            )}
+
+                            {/* دکمه آپلود که روی لوگو ظاهر می‌شود */}
+                            <button
+                                onClick={handleUploadClick}
+                                disabled={isUploading}
+                                className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 flex items-center justify-center rounded-full transition-all duration-300 cursor-pointer"
+                                aria-label="آپلود لوگو"
+                            >
+                                {isUploading ? (
+                                    // نمایش انیمیشن لودینگ
+                                    <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+                                ) : (
+                                    // نمایش آیکون دوربین در حالت هاور
+                                    <FaCamera className="text-white text-3xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                                )}
+                            </button>
+                        </div>
+
                         <div className="text-center md:text-right rtl:md:text-left flex-grow">
                             <h1 className="text-4xl font-bold">{company.name}</h1>
                             {company.industry && (
                                 <p className="text-lg text-indigo-200 mt-2 flex items-center justify-center md:justify-start">
-                                    <FaIndustry className="ml-2 rtl:mr-2 rtl:ml-0" />{company.industry}
+                                    <FaIndustry className="ml-2 rtl:mr-2 rtl:ml-0" />
+                                    {company.industry}
                                 </p>
                             )}
                             <div className="mt-3 flex items-center justify-center md:justify-start">
@@ -277,6 +359,7 @@ const CompanyDetailPage = ({ params }: CompanyDetailPageProps) => {
                                 <span className="ml-3 rtl:mr-3 text-sm text-indigo-100">({ratings_count ?? 0} نظر)</span>
                             </div>
                         </div>
+
                         <div className="mt-4 md:mt-0">
                             <button onClick={handleOpenEditModal} className="bg-white text-blue-600 hover:bg-blue-100 dark:bg-gray-200 dark:text-gray-800 dark:hover:bg-gray-300 font-bold py-2 px-4 rounded-lg shadow-md flex items-center transition-colors">
                                 <FaEdit className="ml-2 rtl:mr-2" /> ویرایش شرکت
@@ -407,20 +490,30 @@ const CompanyDetailPage = ({ params }: CompanyDetailPageProps) => {
                     <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl w-full max-w-lg">
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="text-2xl font-bold text-gray-800 dark:text-white">افزودن کارمند جدید</h2>
+                            {/* به جای `() => setIsAddEmployeeModalOpen(false)` از تابع openModal استفاده کنید اگر دکمه‌ای برای باز کردن دارید */}
                             <button onClick={() => setIsAddEmployeeModalOpen(false)} className="text-gray-500 hover:text-gray-800 dark:hover:text-gray-300"><FaTimes size={24} /></button>
                         </div>
                         <form onSubmit={handleAddEmployeeSubmit} className="space-y-4">
-                            <input type="number" name="user_id" value={newEmployeeFormData.user_id} onChange={(e) => handleEmployeeFormChange(e)} placeholder="شناسه کاربر (User ID)" required className="w-full p-3 rounded-lg bg-gray-100 dark:bg-gray-700" />
-                            <input name="job_title" value={newEmployeeFormData.job_title} onChange={(e) => handleEmployeeFormChange(e)} placeholder="عنوان شغلی" required className="w-full p-3 rounded-lg bg-gray-100 dark:bg-gray-700" />
-                            <input type="date" name="start_date" value={newEmployeeFormData.start_date} onChange={(e) => handleEmployeeFormChange(e)} required className="w-full p-3 rounded-lg bg-gray-100 dark:bg-gray-700" />
-                            <select name="employment_type" value={newEmployeeFormData.employment_type} onChange={(e) => handleEmployeeFormChange(e)} className="w-full p-3 rounded-lg bg-gray-100 dark:bg-gray-700">
+
+                            {/* این بخش جایگزین اینپوت شناسه کاربر شده است */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">کارمند</label>
+                                <EmployeeSearchInput
+                                    initialValue={employeeName}
+                                    onEmployeeSelect={handleEmployeeSelect}
+                                />
+                            </div>
+
+                            <input name="job_title" value={newEmployeeFormData.job_title} onChange={handleEmployeeFormChange} placeholder="عنوان شغلی" required className="w-full p-3 rounded-lg bg-gray-100 dark:bg-gray-700" />
+                            <input type="date" name="start_date" value={newEmployeeFormData.start_date} onChange={handleEmployeeFormChange} required className="w-full p-3 rounded-lg bg-gray-100 dark:bg-gray-700" placeholder="تاریخ شروع" />
+                            <select name="employment_type" value={newEmployeeFormData.employment_type} onChange={handleEmployeeFormChange} className="w-full p-3 rounded-lg bg-gray-100 dark:bg-gray-700">
                                 <option>تمام وقت</option>
                                 <option>پاره وقت</option>
                                 <option>قراردادی</option>
                                 <option>کارآموزی</option>
                                 <option>فریلنسری</option>
                             </select>
-                            <select name="role" value={newEmployeeFormData.role} onChange={(e) => handleEmployeeFormChange(e)} className="w-full p-3 rounded-lg bg-gray-100 dark:bg-gray-700">
+                            <select name="role" value={newEmployeeFormData.role} onChange={handleEmployeeFormChange} className="w-full p-3 rounded-lg bg-gray-100 dark:bg-gray-700">
                                 <option value="member">عضو (Member)</option>
                                 <option value="admin">مدیر (Admin)</option>
                             </select>
